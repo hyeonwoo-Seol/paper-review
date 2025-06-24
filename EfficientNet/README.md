@@ -23,10 +23,13 @@
 
 ![Table3: Scaling Up MobileNets and ResNet](image/Table3.png)
 - EfficientNet을 ImageNet에서 학습할 때, decay=0.9 와 momentum=0.9인 RMSprop를 사용하고, batch norm momentum=0.99, weight decay=1e-5, 2.4 epochs 마다 0.97 배율로 감소하는 initial learning rate=0.256 를 사용했습니다. 그리고 SiLU, AutoAugment, survival probability가 0.8인 Stochastic Depth 기법을 사용했습니다. 모델의 크기가 커질수록 선형적으로 증가하는 dropout을 사용했습니다. 25K의 이미지를 minival set으로 분리하고, early stopping 기법을 수행했습니다. 이렇게 학습된 EfficientNet과 다른 모델을 비교한 표2가 아래 있습니다.
+
 ![Table2: EfficientNet Performance Result on ImageNet](image/Table2.png)
 - EfficientNet 모델을 전이학습 데이터셋에서도 평가한 결과인 표5가 아래에 있습니다.
+
 ![Table5: EfficientNet Performance Results on Transfer Learning DataSets](image/Table5.png)
 - 여러 모델들과 EfficientNet의 정확도-파라미터 수 곡선을 비교한 그림6가 아래에 있습니다.
+
 ![Figure6: Model Parameters vs. Transfer Learning Accuracy](image/Figure6.png)
 
 ## 7. 결론
