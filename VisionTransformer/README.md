@@ -1,3 +1,4 @@
+# VisionTransformer paper Summary
 ## 1. 논문 정보
 - 제목: Vision Transformer: A Review of Architecture, Applications, and Future Directions
 - 저자: Abdelhafid Berroukham, Khalid Housni, Mohammed Lahraichi
@@ -34,5 +35,22 @@
 - 이를 해결하기 위해 사용하는 기법이 바로 Positional Encoding입니다. Positional Encod-ing은 각 패치의 위치 정보를 담은 벡터를, 해당 패치의 특징 벡터에 더해주는 방식으로 이루어집니다. 즉, 단순히 패치의 내용뿐만 아니라 이 패치가 이미지의 어디에 있는지에 대한 정보를 함께 제공함으로써, 모델이 패치 간의 공간적 관계(Spatial Relationship)를 인식할 수 있도록 돕습니다.
 
 ## 5. 방법론
+### Vision Transformer Architecture
+- Vision Transformer의 아키텍처는 기본적으로 여러 개의 Transformer 블록으로 구성되며, 각 블록은 Multi-head Self-Attention과 Feedforward Neural Network로 이루어져 있습니다.
+- Multi-head Self-Attention은 여러 개의 Attention Head를 병렬로 적용하여, 입력의 서로 다른 부분 간의 다양한 관계를 학습할 수 있게 합니다. 각 Head는 서로 다른 정보에 집중함으로써, 입력 전체에 대한 맥락을 동시에 학습할 수 있습니다. 또한 이러한 구조는 표현력을 높이면서도 전체 파라미터 수나 연산 비용을 크게 증가시키지 않기 때문에, 효율성과 성능 면에서 장점을 가집니다.
 
+### Input Image Preporcessing
+- ViT는 입력 이미지를 먼저 고정 크기의 패치(Patch)로 분할합니다. 이후 각 패치는 Flatten 과정을 거쳐 1차원 벡터로 펼쳐지고, 선형 임베딩(Linear Embedding)을 통해 고정된 차원의 벡터로 변환됩니다. Transformer 구조는 NLP 분야에서 개발됐기 때문에, 입력 데이터를 고정된 차원의 벡터 형태로 통일해서 입력받아야 합니다. 이미지는 공간 구조를 갖고 있지만, 이를 Transformer가 처리하기 위해서는 각 패치를 동일한 크기의 벡터로 변환하는 과정이 필요합니다. 그 이유는 이미지마다 패치의 개수가 다를 수 있고, 이를 통일된 형태로 맞추지 않으면 Transformer의 입력 구조에 적합하지 않기 때문입니다.
 
+### Positional Encoding
+- Transformer는 순서 개념이 없기 때문에, 각 패치의 공간적 위치 정보를 추가적으로 제공해야 합니다. 이를 위해 학습 가능한 위치 임베딩(Positional Embedding)을 각 패치 벡터에 더해주며, 이 과정을 통해 모델은 패치 간의 위치 관계를 학습할 수 있습니다.
+
+### Transformer Encoder, MLP Head
+- 이렇게 생성된 입력은 여러 층의 Transformer Encoder를 통과하게 됩니다. Encoder는 반복적으로 Self-Attention과 Feedforward Network를 적용하여, 패치 간의 복합적인 상호작용을 학습합니다. 모든 패치에 걸쳐 생성된 출력은 Pooling 과정을 통해 하나의 통합 벡터로 요약되며, 이 벡터는 MLP Head로 전달됩니다. MLP Head는 두 개의 Fully Connected Layer로 구성되어 있으며, 최종적으로 분류 클래스 수만큼의 Logits을 출력합니다. Logits은 각 클래스에 대한 예측 점수를 나타내며, 소프트맥스(Softmax)를 통해 확률로 변환됩니다.
+
+## 6. 실험 결과
+
+## 7. 결론
+
+## 8. 느낀점
+- 현재 LLM 성능 향상을 목적으로 하는 연구가 많이 진행되고 있는데, 이 구조를 잘 수정하여 Computer Vision에도 적용시킨다면 Computer Vision도 성능 향상을 얻을 수 있을 것 같다고 느꼈습니다.
