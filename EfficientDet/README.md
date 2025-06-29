@@ -19,7 +19,7 @@
 - 아래 Figure3는 EfficientDet의 전체 아키텍처를 보여주고, 이 그림에서 EfficientDet이 one-stage detectors 패러다임을 따르는 것을 볼 수 있습니다. EfficientDet은 ImageNet으로 사전학습된 EfficientNet을 Backbone 네트워크로 사용하고 있고, level 3 ~ levle 7의 특징들을 입력받아 top-down과 botton-up의 양방향 특징 융합을 반복적으로 수행하는 BiFPN가 feature network 역할을 합니다. 여기서 융합된 특징들은 class/box prediction Network에 입력되어 객체 클래스와 bounding box 예측을 제공합니다.
   ![Figure3: EfficientDet Architecture](image/Figure3.png)
 - Compound Scaling의 single compound coefficient를 사용해서 Backbone 네트워크, class/box prediction 네트워크, 해상도를 동시에 확장합니다. Backbone 네트워크로는 EfficientNet B0 ~ B6를 사용했습니다.
-- BiFPN 네트워크의 depth는 작은 정수이어야 함으로, 선형적으로 증가시켰습니다. width는 grid search를 사용해서 {1.2, 1.25, 1.3, 1.35, 1.4, 1.45} 중 1.35가 성능이 제일 좋음을 확인했고, 이를 통해 width와 depth를 ![eq2: BiFPN width, depth scale eq](image/eq2.png)
+- BiFPN 네트워크의 depth는 작은 정수이어야 함으로, 선형적으로 증가시켰습니다. width는 grid search를 사용해서 {1.2, 1.25, 1.3, 1.35, 1.4, 1.45} 중 1.35가 성능이 제일 좋음을 확인했고, 이를 통해 width와 depth를 ![eq2: BiFPN width, depth scale eq](image/eq2.png) 로 확장시켰습니다.
 - Class/Box Prediction 네트워크에서, depth는 BiFPN과 동일하게 고정시켰지만 depth는 ![eq3: Class/Box Prediction depth](image/eq3.png) 를 사용해서 선형적으로 증가시켰습니다.
 - BiFPN에서 feature level 3~7이 사용되기 때문에 입력 해상도는 2의 7승인 128로 나누어 떨어지는 값이어야 합니다. BiFPN에서 feature level 3 ~7을 모두 사용하려면 입력 이미지를 다운샘플링했을 때 정수 크기의 특징맵이 나와야 하고, level L의 특징은 원본 해상도를 2의 L승으로 나눈 크기입니다. 여기서 level 7의 정수 분할이 보장되면 level 3 ~ 6에서도 모두 정수 분할이 되기 때문에 입력 해상도는 128로 나누어 떨어지는 값이어야 합니다. 따라서 ![eq4: Input Resolution eq](image/eq4.png) 를 사용해서 선형적으로 해상도를 증가시킵니다.
 - compound coefficient를 0부터 7까지 위 식들에 적용시키면 Table1에서 볼 수 있는 여러 EfficientDet 모델들을 만들 수 있습니다. Table1에서 D6가 2번 보이는데, compound coefficient가 7인 D6는 comopund coefficient가 6인 D6에 해상도만 더 높은 모델입니다.
