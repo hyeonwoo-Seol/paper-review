@@ -26,7 +26,19 @@
 
   ![Table1: Scaling configs for EfficientDet D0 D6](image/Table1.png)
 
+- EfficientDet의 각 모델들은 SGD Optimizer로 학습되었고, Momentum = 0.9, weight decay = 4e-5로 설정되었습니다. Learning Rate는 첫 번째 epoch 안에서 0부터 0.16까지 선형적으로 증가시킨 뒤, Cosine Decay 규칙을 사용하여 감소시켰습니다. 모든 Convolution 이후에 synchronized batch normalization을 적용하고, 이 batch normalization의 decay = 0.99, epsilon = 1e-3 으로 설정했습니다. 또한 switch activation과 exponential moving average를 사용하고, exponential moving average의 decay = 0.9998을 사용했습니다. Focal Loss를 사용했고, Focal Loss의 alpha = 0.25, gamma = 1.5, aspect ratio {1/2, 1, 2}를 사용했습니다.
+
 ## 6. 실험 결과
+- Table2는 single model 및 single scale 설정에서 test-time augmentation 없이 EfficientDet과 기존의 객체 탐지 모델들을 비교한 것입니다.
+  ![Table2: EfficientDet performance on COCO](image/Table2.png)
+- Figure4는 모델의 크기, GPU 지연시간, single-thread CPU 지연 시간에 대한 비교를 보여줍니다.
+  ![Figure4: Model size and inference latency comparison](image/Figure4.png)
+- Sementic Segmentation 과제에서도 EfficientDet이 잘 작동하는지 확인하기 위해, BiFPN의 P2 ~ P7 수준의 특징들을 유지하고 최종 픽셀 분류에서 P2만 사용하도록 모델을 수정했고 아래 Table3는 EfficientDet-D4 모델과 기존의 DeepLabV3+, Pascal VOC 2012와 비교한 표입니다.
+  ![Table3: Performance comparison on Pascal VOC semantic segmentation](image/Table3.png)
+- Ablation Study를 통해, EfficientNet Backbone과 BiFPN이 최종 모델의 성능에 핵심적인 요소임을 Table4를 통해 확인했습니다. Table5를 보면 BiFPN이 다른 네트워크들 보다 적은 파라미터 수와 FLOPS를 사용하면서도 유사한 정확도를 달성함을 확인할 수 있었습니다. 그리고 Table6를 보면 fast normalized feature fusion 방식과 softmax 기반 방식을 비교한 것을 볼 수 있습니다.
+  ![Table4: Disentangling backbone and BiFPN](image/Table4.png)
+  ![Table5: Comparison of different feature network](image/Table5.png)
+  ![Table6: Comparison of different feature fusion](image/Table6.png)
 
 ## 7. 결론
 - 이 논문은 효율적인 객체탐지와 정확도 및 효율성 향상을 위해서, network architecture desing choices를 분석하고 weighted bi-directional feature network와 compound scaling 기법을 제안합니다. 이를 통해 EfficientDet이라는 새로운 모델을 만들었고, 다양한 자원 제약 상황에서 기존 기법들보다 더 일관된 정확도 및 효율성을 달성했습니다. 스케일된 EfficientDet은 이전의 객체 탐지 및 의미론적 분한 모델들보다 훨씬 적은 파라미터 수와 FLOPS를 달성해서 State-of-the-Art 정확도를 달성했습니다.
