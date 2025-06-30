@@ -21,7 +21,7 @@ resolution, depth, width를 Backbone, Feature Network, Box/Class Prediction Netw
 
 BiFPN은 학습 가능한 가중치를 도입하여 각 입력 특징의 중요도를 학습하고, top-down과 botton-up 방식의 다중 스케일 특징 융합을 반복적으로 수행합니다. 즉, 양방향 경로와 fast normalized fusion을 결합해서 서로 다른 해상도를 갖는 특징맵을 더 정교하게 융합합니다.
 
-BiFPN은 위의 Figure2(d)의 구조를 가지고 있고, 수식은 ![eq1: BiFPN eq](image/eq1.png) 입니다. 이 수식에서 Resize(P^in_7)을 통해 사이즈를 업샘플링합니다. Conv()를 통해 Depthwise Separable Convolution을 적용하고 Batch Normalization과 Activation을 수행합니다.
+BiFPN은 위의 Figure2(d)의 구조를 가지고 있고, 수식은 ![eq1: BiFPN eq](image/eq1.png) 입니다. 이 수식에서 Resize(P^in_7)을 통해 사이즈를 업샘플링합니다. Resize(P^out_5)를 통해 사이즈를 다운샘플링합니다. Conv()를 통해 Depthwise Separable Convolution을 적용하고 Batch Normalization과 Activation을 수행합니다.
 
 Object detection을 위한 compound scaling 기법을 통해, resolution, depth, width를 backbone, feature network, box/class prediction network 전체에 걸쳐서 확장합니다.
 
