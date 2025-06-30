@@ -1,6 +1,7 @@
 ## 1. 논문 정보
-- 제목: MambaVision: A Hybrid Mamba-Transformer Vision Backbone
-- 저자: Ali Hatamizadeh Jan Kautz
+제목: MambaVision: A Hybrid Mamba-Transformer Vision Backbone
+
+저자: Ali Hatamizadeh Jan Kautz
 
 ## 2. Abstract 요약
 Vision 응용 분야에 특화된 새로운 Hybrid Mamba Transformer Backbone인 MambaVision을 제안합니다.
