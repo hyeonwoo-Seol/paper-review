@@ -27,15 +27,17 @@ Figure2는 SegFormer의 구조를 보여줍니다.
 ![Figure2: The proposed SegFormer Framework](image/Figure2.png)
 
 ### Hierarchical Transformer Encoder
-아키텍처가 동일하지만 크기만 다른 Mix Transformer-B0 부터 B5까지 설계했습니다. Mix Transformer에는 PVT의 계층적 아키텍처 Efficient Self-Attention 모듈 위에 Overlapped Patch Merging과 Positiona-Encoding-Free Design 등을 추가했습니다. 인코더에는 입력 이미지를 기반으로 multi-level multi-scale 특징들을 생성합니다. 이러한 특징들은 고해상도의 거친 특징과 저해상도의 세밀한 특징을 함께 제공하기 때문에 Semantic Segmentation 성능을 향상시킵니다. 각 Transformer Block 안에 Overlap Patch Merging을 수행해서 해상도가 H/2^(i+1) x W/2^(i+1) x C_i 인 Hierarchical Feature map을 생성합니다.
+아키텍처가 동일하지만 크기만 다른 Mix Transformer-B0 부터 B5까지 설계했습니다. Mix Transformer에는 PVT의 계층적 아키텍처 Efficient Self-Attention 모듈 위에 Overlapped Patch Merging을 추가하고 Positiona-Encoding-Free Design을 사용했습니다. 인코더에는 입력 이미지를 기반으로 multi-level multi-scale 특징들을 생성합니다. 이러한 특징들은 고해상도의 거친 특징과 저해상도의 세밀한 특징을 함께 제공하기 때문에 Semantic Segmentation 성능을 향상시킵니다. 각 Transformer Block 안에 Overlap Patch Merging을 수행해서 해상도가 H/2^(i+1) x W/2^(i+1) x C_i 인 Hierarchical Feature map을 생성합니다.
 
-계층적 특징 표현은 높은 해상도의 특징으로부터 긴 시퀀스가 생성될 때 self-Attention의 복잡도가 제곱 형태가 되는 문제가 있어서, Transformer 불록 안의 Multi-head Self-Attention에 Sequence Reduction 기법을 적용합니다. 아래 eq2를 사용하여 시퀀스 길이를 줄입니다. 첫 번째 식은 K를 N/R x (C ⋅ R) 형태로 변형하고, 두 번째 식은 (C ⋅ R) 차원의 텐서를 입력으로 받아서 C 차원의 텐서를 출력하는 선형 계층을 나타냅니다. 새로운 K는 N/R x C 의 차원을 가지게 되고, 이로 인해 Self-Attention의 복잡도 O(N^2)가 Efficient Self-Attention의 복잡도 O(N^2/R)로 줄어들게 됩니다. 논문의 저자는 실험을 통해 Stage1 ~ 4까지의 R값을 {64, 16, 4, 1}로 설정했습니다.
+계층적 특징 표현은 높은 해상도의 특징으로부터 긴 시퀀스가 생성될 때 self-Attention의 복잡도가 제곱 형태가 되는 문제가 있어서, Transformer 불록 안의 Multi-head Self-Attention에 Sequence Reduction 기법을 적용합니다. 아래 eq2인 Sequence Reduction을 사용하여 시퀀스 길이를 줄입니다. 첫 번째 식은 K를 N/R x (C ⋅ R) 형태로 변형하고, 두 번째 식은 (C ⋅ R) 차원의 텐서를 입력으로 받아서 C 차원의 텐서를 출력하는 선형 계층을 나타냅니다. 새로운 K는 N/R x C 의 차원을 가지게 되고, 이로 인해 Self-Attention의 복잡도 O(N^2)가 Efficient Self-Attention의 복잡도 O(N^2/R)로 줄어들게 됩니다. 논문의 저자는 실험을 통해 Stage1 ~ 4까지의 R값을 {64, 16, 4, 1}로 설정했습니다.
 
 ![eq2](image/eq2.png)
 
-이웃한 패치 사이의 Local Continuity를 유지하기 위해, Overlapping Patch Merging을 사용합니다. 이 때 K(patch size), S(stride between two adjacent patches), P(padding size)를 정의하고, K=7 / S=4 / P=3 과 K=3 / S=2 / P=1로 설정하고 이 값으로 Overlapping Patch Merging을 수행했습니다. 이를 통해 non-overlapping과 동일한 크기의 특징을 생성합니다.
+이웃한 패치 사이의 Local Continuity(연속성)를 유지하기 위해, Overlapping Patch Merging을 사용합니다. 이를 위해서는 Patch Size는 Stride Size보다 커야 합니다. 따라서 K(patch size), S(stride between two adjacent patches), P(padding size)를 정의하고, K=7 / S=4 / P=3 과 K=3 / S=2 / P=1로 설정하고 이 값으로 Overlapping Patch Merging을 수행했습니다. 이를 통해 non-overlapping과 동일한 크기의 특징을 생성합니다.
 
-Test와 Training 이미지의 해상도 불일치는 Semantic Segmentation에서 자주 발생하고, 이로 인해 Positional Encoding을 보간(interpolate)해야 하고, 이는 성능 하락으로 이어집니다. SegFormer는 Positional Encoding을 제거하고 Mix-FFN을 도입했습니다. FFN에서 3x3 Conv를 직접 사용해서 Zero Padding이 위치 정보를 누락시키는 효과를 고려합니다. Mix-FFN의 수식은 ![eq3](image/eq3.png) 입니다. 이 수식에서 x_in은 Self-Attention 모듈에서 나온 Feature이고, Mix-FFN은 FFN에 3x3 Conv 와 MLP를 혼합하여 사용합니다. 그리고 파라미터 수를 줄이고 효율성을 높이기 위해 Depth-wise Convolution을 사용합니다.
+Test와 Training 이미지의 해상도 불일치는 Semantic Segmentation에서 자주 발생하고, 이로 인해 Positional Encoding을 보간(interpolate)해야 하고, 이는 성능 하락으로 이어집니다. SegFormer는 Positional Encoding을 제거하고 Mix-FFN을 도입했습니다. FFN에서 3x3 Conv를 직접 사용해서 Zero-Padding으로 인해 위치 정보가 새어나오는 효과를 활용할 수 있습니다. Zero-padding을 통해 0이 위치한 곳이 이미지의 바깥쪽이라는 것을 간접적으로 인지할 수 있습니다.
+
+Mix-FFN의 수식은 ![eq3](image/eq3.png) 입니다. 이 수식에서 x_in은 Self-Attention 모듈에서 나온 Feature이고, Mix-FFN은 FFN에 3x3 Conv 와 MLP를 혼합하여 사용합니다. 그리고 파라미터 수를 줄이고 효율성을 높이기 위해 Depth-wise Convolution을 사용합니다.
 
 ### Lightweight All-MLP Decoder
 SegFormer의 Lightweight All-MLP Decoder는 오직 MLP 계층만으로 이루어진 간단한 디자인을 가지고 있습니다. 이 디코더의 동작은 아래 수식을 따릅니다.
@@ -95,7 +97,7 @@ Table5는 모델의 견고성을 비교한 것을 확인할 수 있습니다.
 ## 7. 결론
 SETR과 SegFormer를 비교했을 때, SegFormer는 ImageNet-1K 만을 사용하여 사전학습했지만, SETR은 ImageNet-22K로 사전학습하여 사전 학습 크기에 차이가 있습니다.
 
-SegFormer의 인코더는 hierarchical 구조를 가지고 있어서 ViT 보다 작고 고해상도와 저해상도를 모두 포착할 수 있습니다. 반면, SETR의 ViT 인코더는 하나의 저해상도 특징맵만 생성할 수 있습니다.
+SegFormer의 인코더는 hierarchical 구조를 가지고 있어서 ViT 보다 작고 고해상도와 저해상도를 모두 사용할 수 있습니다. 반면, SETR의 ViT 인코더는 하나의 저해상도 특징맵만 생성할 수 있습니다.
 
 SegFormer는 인코더에서 Positional Embedding을 제거했지만, SETR은 고정된 Positional Embedding을 사용했습니다. Test와 Training의 해상도가 다를 경우 정확도를 떨어트리게 됩니다.
 
@@ -107,3 +109,4 @@ SegFormer의 MLP 디코더는 SETR보다 간단하고 연산 부담이 적습니
 
 다만, 일부 edge device에서 동작하기에는 무거운 모델이며, mixed-precision Training과 Pruning, Hardware-friendly Attention Design, Energy Consumption 등의 추가적인 연구가 필요합니다.
 ## 8. 느낀점
+Semantic Segmentation과 같이, Test와 Train의 해상도가 다른 환경에서 Positional Encoding을 제거하면 성능 향상을 유도할 수 있다는 것을 알게 되었습니다.
