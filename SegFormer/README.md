@@ -38,10 +38,72 @@ Figure2는 SegFormer의 구조를 보여줍니다.
 Test와 Training 이미지의 해상도 불일치는 Semantic Segmentation에서 자주 발생하고, 이로 인해 Positional Encoding을 보간(interpolate)해야 하고, 이는 성능 하락으로 이어집니다. SegFormer는 Positional Encoding을 제거하고 Mix-FFN을 도입했습니다. FFN에서 3x3 Conv를 직접 사용해서 Zero Padding이 위치 정보를 누락시키는 효과를 고려합니다. Mix-FFN의 수식은 ![eq3](image/eq3.png) 입니다. 이 수식에서 x_in은 Self-Attention 모듈에서 나온 Feature이고, Mix-FFN은 FFN에 3x3 Conv 와 MLP를 혼합하여 사용합니다. 그리고 파라미터 수를 줄이고 효율성을 높이기 위해 Depth-wise Convolution을 사용합니다.
 
 ### Lightweight All-MLP Decoder
+SegFormer의 Lightweight All-MLP Decoder는 오직 MLP 계층만으로 이루어진 간단한 디자인을 가지고 있습니다. 이 디코더의 동작은 아래 수식을 따릅니다.
 
+![eq4](image/eq4.png)
+
+위 수식에서 Linear(A, B)는 입력 차원이 A이고 출력 차원이 B인 Fully-Connected Layer를 의미합니다.
+
+우선, 채널 수를 통일하기 위해 MiT 인코더에서 얻은 특징들을 Linear(C_i, C) 계층을 통과시킵니다. 이를 통해 하나의 공통된 차원 C가 됩니다.
+
+그리고 해상도를 맞추기 위해, H/4 x W/4 해상도로 업샘플링합니다. 이를 통해 서로 다른 해상도의 특징들을 같은 공간 크기로 맞출 수 있습니다.
+
+네 단계에서 받은 H/4 x W/4 x C 크기의 특징을 concatenate한 뒤, Linear(4C, C)를 통해 C 차원으로 융합시킵니다.
+
+융합된 특징을 Linear(C, N_cls)에 입력하여 최종 클래스 수 N_cls의 segmentation mask인 M을 직접 예측합니다.
+
+SegFormer의 Effective Receptive Field를 보면, 기존의 CNN 기반 Segmentation 보다 우수한 점이 있습니다. 아래 Figure3를 보면, DeepLabv3+는 Stage4에서 Effective Receptive Field가 화면 중앙 근처에만 제한적으로 집중되지만 SegFormer는 Stage4에서 이미지 전체에 Effective Receptive Field가 넓게 퍼져 있습니다.
+
+즉, SegFormer는 Stage4에서 전역 문맥을 자연스럽게 포착할 수 있습니다.
+
+SegFormer는 Local과 Non-Local 정보를 동시에 포착합니다. MLP head를 보면 Stage4의 Non-Local Attention을 사용한 것 보다 중심부에 강한 Receptive Field가 나타나는 것을 볼 수 있습니다. 이를 통해 All-MLP 디코더는 Stage4에서 얻은 Non-Local과 MLP의 Local을 둘 다 사용합니다.
+
+기존의 CNN에서는 Effective Receptive Field를 넓히기 위해 ASPP(Atrous Spatial Pyramid Pooling) 같은 무거운 Context 모듈을 사용해야 했지만, SegFormer는 Transformer 인코더가 충분히 큰 Effective Receptive Field를 제공하기 때문에 4개의 MLP 만으로 Local과 Non-Local 정보를 효과적으로 융합할 수 있습니다.
+
+이를 통해 파라미터와 연산량이 줄어들고 모델의 구조가 단순해지는 장점이 있습니다.
+![Figure3: ](image/Figure3.png)
 
 ## 6. 실험 결과
+학습 과정에서 데이터 증강을 적용했습니다. 배율을 0.5 ~ 2.0 사이로 하고 Random Resize, Random Horizontal Flipping, Random Cropping을 적용했습니다. 그리고 AdamW Optimizer를 사용하여 ADE20K와 Cityscapes 데이터셋을 160K 반복하고, COCO-Stuff 데이터셋을 80K 반복하여 학습했습니다.
+
+배치 사이즈는 ADE20K와 COCO-Stuff 에서 16, Cityscapes에서 8을 사용했습니다. 초기 Learning rate는 0.00006을 사용했고, factor가 1.0인 poly Learning rate schedule을 사용했습니다.
+
+간단함을 유지하기 위해, OHEM, Auxiliary losses, class balance loss 등은 사용하지 않았습니다.
+
+Semantic Segmentation의 성능 평가는 mIoU를 사용했습니다.
+
+![Table1: ](image/Table1.png)
+위 Table1(a)를 보면 인코더의 크기가 가장 작은 모델의 경우, 효율적이며 실시간 응용에 적합한 결과를 보여줍니다. 인코더의 크기가 가장 큰 모델의 경우, State-of-the-Art 성능을 달성했습니다.
+
+Table1(b)에 따라, 채널 차원 값인 C가 증가할수록 성능이 향상되지만 768을 넘어가면 유의미한 성능 개선이 없습니다. 이를 통해 B0 또는 B1 모델에 C=256을 사용하여 실시간 응용 문제를 해결하고, 나머지 모델들은 C=768을 사용할 수 있습니다.
+
+Table1(c)를 통해, Positional Encoding을 사용하지 않는 것이 성능 향상을 보이고, 해상도 변화에 덜 민감합니다.
+
+Table1(d)를 보면, MLP 디코더를 CNN 인코더와 결합하는 것 보다 Transformer 인코더와 결합하는 것이 정확도가 더 높은 것을 알 수 있습니다.
+
+![Table3: ](image/Table3.png)
+Table3를 보면, Swin과 ViT와 MiT를 비교한 것을 볼 수 있습니다. 이를 통해 Semantic Segemntation에서 어떤 인코더와 디코더의 조합이 적절한지 확인할 수 있습니다.
+
+Table4를 보면 Cityscapes 데이터셋에서의 모델 간 성능 차이를 확인할 수 있습니다.
+
+![Table4: ](image/Table4.png)
+
+Table5는 모델의 견고성을 비교한 것을 확인할 수 있습니다.
+
+![Table5 ](image/Table5.png)
 
 ## 7. 결론
+SETR과 SegFormer를 비교했을 때, SegFormer는 ImageNet-1K 만을 사용하여 사전학습했지만, SETR은 ImageNet-22K로 사전학습하여 사전 학습 크기에 차이가 있습니다.
 
+SegFormer의 인코더는 hierarchical 구조를 가지고 있어서 ViT 보다 작고 고해상도와 저해상도를 모두 포착할 수 있습니다. 반면, SETR의 ViT 인코더는 하나의 저해상도 특징맵만 생성할 수 있습니다.
+
+SegFormer는 인코더에서 Positional Embedding을 제거했지만, SETR은 고정된 Positional Embedding을 사용했습니다. Test와 Training의 해상도가 다를 경우 정확도를 떨어트리게 됩니다.
+
+SegFormer의 MLP 디코더는 SETR보다 간단하고 연산 부담이 적습니다.
+
+결론적으로, SegFormer는 Positional Encoding이 없는 Hierarchical Transformer 인코더와 lightweight All-MLP 디코더로 구성된 단순하고 강력한 Semantic Segmentation 방법입니다.
+
+또한 Zero-shot 환경에서 강한 견고성을 보여줍니다.
+
+다만, 일부 edge device에서 동작하기에는 무거운 모델이며, mixed-precision Training과 Pruning, Hardware-friendly Attention Design, Energy Consumption 등의 추가적인 연구가 필요합니다.
 ## 8. 느낀점
