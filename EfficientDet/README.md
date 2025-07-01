@@ -17,9 +17,13 @@ resolution, depth, width를 Backbone, Feature Network, Box/Class Prediction Netw
 ## 4. 핵심 아이디어
 ![Figure2: Feature network desing](image/Figure2.png)
 
-기존의 연구들은 서로 다른 스케일의 특징을 융합하기 위해, 서로 다른 해상도의 입력 특징들을 단순히 더했습니다. 이는 각 특징이 융합된 출력에 기여하는 비중이 동등하지 않다는 것을 고려하지 않았기 때문에, 이 논문은 weighted bi-directional feature pyramid network (BiFPN)을 제안합니다.
+Figure2는 다중 스케일 융합을 구현하는 대표적인 네 가지 네트워크 입니다. 기존의 연구들은 서로 다른 스케일의 특징을 융합하기 위해, 서로 다른 해상도의 입력 특징들을 단순히 더했습니다. 이는 각 특징이 융합된 출력에 기여하는 비중이 동등하지 않다는 것을 고려하지 않았기 때문에,
+
+이 논문은 weighted bi-directional feature pyramid network (BiFPN)을 제안합니다.
 
 BiFPN은 학습 가능한 가중치를 도입하여 각 입력 특징의 중요도를 학습하고, top-down과 botton-up 방식의 다중 스케일 특징 융합을 반복적으로 수행합니다. 즉, 양방향 경로와 fast normalized fusion을 결합해서 서로 다른 해상도를 갖는 특징맵을 더 정교하게 융합합니다.
+
+이 논문은 서로 다른 해상도를 융합할 때 Fast Normalized Fusion 이외에도 Unbounded Fusion과 Softmax-based Fusion도 고려했지만, Fast Normalized Fusion이 속도가 빠르고 성능이 다른 것과 유사해서 이를 선택했습니다.
 
 BiFPN은 위의 Figure2(d)의 구조를 가지고 있고, 수식은 ![eq1: BiFPN eq](image/eq1.png) 입니다. 이 수식에서 Resize(P^in_7)을 통해 사이즈를 업샘플링합니다. Resize(P^out_5)를 통해 사이즈를 다운샘플링합니다. Conv()를 통해 Depthwise Separable Convolution을 적용하고 Batch Normalization과 Activation을 수행합니다.
 
