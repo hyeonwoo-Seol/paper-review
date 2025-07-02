@@ -22,45 +22,36 @@
 이에, Agent가 고차원 Sensory 입력으로부터 효율적인 표현을 스스로 학습하고, 이를 바탕으로 과거 경험을 새로운 상황에 일반화시킬 수 있는 end-to-end 방법이 필요했습니다. 이를 해결하고자 한 것이 Deep Q-Network 입니다.
 
 ## 4. 핵심 아이디어
-
----
-start//
-
-강화학습과 Deep Convolutional Network를 결합했습니다. DCN의 계층적 Conv Filter는 Receptive Field 효과를 모방하고, 이를 통해 이미지 내에 존재하는 Local 공간 상관관계를 활용하고 viewpoint나 scale의 변화와 같은 자연스러운 변형에 대한 강인성을 구축합니다.
-
-강화학습 Agent를 개발할 때 우리는 관찰, 행동, 보상의 시퀀스에 대한 환경과 상호작용하는 과업을 고려했습니다. Agent의 목표는 미래 누적 보상을 극대화할 수 있는 방식으로 행동을 선택하는 것이니다. 최적의 action-value 함수 ![eq1](image/eq1.png)를 근사하기 위해 Deep Convolutional Network를 사용합니다.
-eq1 수식은 각 시각 t에서 할인율 gamma를 적용한 보상 r_t의 최대 합이고, 상태 s를 관찰한 후 행동 a를 선택하는 정책인 pi = P(a|s)에 의해 달성됩니다.
-
-강화학습은 nonlinear function approximator를 사용하여 action-value 함수(Q함수)를 표현할 때, 불안정하거나 수렴이 안되는 현상이 있습니다. 이에 대한 원인은 관찰 순서에 대한 상관관계, Q의 작은 업데이트가 정책을 변경시켜 데이터 분포가 바뀌거나, Q함수와 목표값 사이의 상관관계입니다.
-
-위 3가지 원인을 해결하기 위해 새로운 Q-Learning의 변형을 제안합니다. 이에 대한 핵심 아이디어는 "experience Replay"과 "Target Network"입니다. 데이터를 무작위함으로써 관찰 시퀀스 내의 상관관계를 제거하고 데이터 분포 변화에 대한 smoothing을 얻습니다. 그리고 Target Network를 사용해서 Q함수를 주기적으로만 갱신되는 목표값에 맞춰서 조정함으로써 목표값과 상관관계를 줄입니다.
-
-Deep Convolutional Neural Network를 통해 Q(s, a, theta)를 매개변수화 시킴으로써 네트워크를 처음부터 다시 학습시켜야 하는 문제를 해결했습니다.
-
-End//
-
----
-
+### End-to-End Learning
 raw pixel로부터 end-to-end 강화학습을 합니다. 기존의 강화학습은 사람이 직접 설계한 특징이나 저차원 상태에서만 가능했지만, 이 논문은 영상 프레임을 가공하지 않고 그대로 네트워크 입력으로 사용합니다.
 
-이를 통해 Agent는 자동으로 환경의 효율적인 표현을 핛브하고 과거 경험을 새로운 상황에 일반화시킬 수 있습니다.
+### Deep Convolutional Network
+Deep Convolutional Neural Network와 Q-learning을 융합했습니다.
+네트워크의 계층적인 Convolution 필터는 생물학적 Receptive Field와 유사하게 작동하기 때문에, 이미지 내의 Local spatial Correlations를 학습하고, Viewpoint와 scale 변화에 강인한 표현을 구축합니다. 이렇게 DCNN과 Q-learning을 융합함으로써 복잡한 시각 입력 환경에서 인간 수준의 정책을 학습할 수 있습니다.
 
-강화학습 안정화를 위해 아래 2가지인 Experience Replay와 Target Network 방법을 사용합니다.
+강화학습 Agent를 개발할 때 우리는 관찰, 행동, 보상의 시퀀스에 대한 환경과 상호작용하는 과업을 고려했습니다. Agent의 목표는 미래 누적 보상을 극대화할 수 있는 방식으로 행동을 선택하는 것이니다. 이 목표를 정량적으로 측정해주는 것이 Action-Value 함수입니다.
+
+최적의 action-value 함수 ![eq1](image/eq1.png)를 근사하기 위해 Deep Convolutional Network를 사용합니다.
+eq1 수식은 각 시각 t에서 할인율 gamma를 적용한 보상 r_t의 최대 합이고, 상태 s를 관찰한 후 행동 a를 선택하는 정책인 pi = P(a|s)에 의해 달성됩니다.
+
+### Q-learning과 Experience Replay 및 Target Network
+기존의 강화학습은 nonlinear function approximator를 사용하여 action-value 함수(Q함수)를 표현할 때, 불안정하거나 수렴이 안되는 현상이 있습니다. 이에 대한 원인은 1)관찰 순서에 대한 상관관계, 2)Q의 작은 업데이트가 정책을 변경시켜 데이터 분포가 바뀌거나, 3)Q함수와 목표값 사이의 상관관계입니다.
+
+위 3가지 원인을 해결하기 위해 새로운 Q-Learning의 변형을 제안합니다. 이에 대한 핵심 아이디어는 "experience Replay"과 "Target Network"입니다. 데이터를 무작위함으로써 관찰 시퀀스 내의 상관관계를 제거하고, experience Replay를 사용함으로써 데이터 분포 변화에 대한 smoothing을 얻습니다. 그리고 Target Network를 사용해서 Q함수를 주기적으로만 갱신되는 목표값에 맞춰서 조정함으로써 목표값과 상관관계를 줄입니다.
+
 Experience Replay는 과거의 (state, action, reward, next state) 샘플을 메모리에 저장했다가 무작위로 뽑아 학습함으로써 샘플 사이의 상관관계를 제거하고 데이터의 효율을 높입니다.
 
----
-Start//
-
-experience replay을 수행하기 위해, 각 시각 t마다 Agent의 경험 e를 e_t=(s_t, a_t, r_t, s_t+1) 형태로 만들어서 데이터셋 D_t={e_1,...,e_t}에 저장합니다. 학습을 할 때, 여기서 무작위로 샘플을 선택해서 Q-Learning을 수행합니다. Q-learning을 업데이트 할 때 ![eq2](image/eq2.png) 손실 함수를 사용합니다. 이 때 gamma는 할인율로 agent의 미래 horizon을 결정하고, theta_i는 현재 반복 단계 i에서의 Q-Network 파라미터이고, theta^-_i는 같은 반복 단계에서 target Network를 위한 파라미터입니다. 이 theta^-_i는 C 단계마다 한 번씩만 Q-network 파라미터 theta_i로 업데이트 되고, 이외에는 고정된 상태로 유지됩니다.
-
-End//
-
----
+experience replay을 수행하기 위해, 각 시각 t마다 Agent의 경험 e를 e_t=(s_t, a_t, r_t, s_t+1) 형태로 만들어서 데이터셋 D_t={e_1,...,e_t}에 저장합니다. 학습을 할 때, 여기서 무작위로 샘플을 선택해서 Q-Learning을 수행합니다.
 
 Target Network는 일정 간격으로만 업데이트 되는 고정된 네트워크를 타겟 값 계싼에 사용해서 Q-Value 값 추정의 발산을 억제합니다. 이를 통해 학습 안정성을 확보합니다.
 
-Deep Convolutional Neural Network와 Q-learning을 융합했습니다.
-네트워크의 계층적인 Convolution 필터는 생물학적 Receptive Field와 유사하게 작동하기 때문에, 이미지 내의 Local spatial Correlations를 학습하고, Viewpoint와 scale 변화에 강인한 표현을 구축합니다. 이렇게 DCNN과 Q-learning을 융합함으로써 복잡한 시각 입력 환경에서 인간 수준의 정책을 학습할 수 있습니다.
+Deep Convolutional Neural Network를 통해 Q(s, a, theta)를 매개변수화 시킴으로써 네트워크를 처음부터 다시 학습시켜야 하는 문제를 해결했습니다.
+
+이를 통해 Agent는 자동으로 환경의 효율적인 표현을 학습하고 과거 경험을 새로운 상황에 일반화시킬 수 있습니다.
+
+Q-learning을 업데이트 할 때 ![eq2](image/eq2.png) 손실 함수를 사용합니다. 이 때 gamma는 할인율로 agent의 미래 horizon을 결정하고, theta_i는 현재 반복 단계 i에서의 Q-Network 파라미터이고, theta^-_i는 같은 반복 단계에서 target Network를 위한 파라미터입니다.
+
+이 theta^-_i는 C 단계마다 한 번씩만 Q-network 파라미터 theta_i로 업데이트 되고, 이외에는 고정된 상태로 유지됩니다.
 
 ## 5. 방법론
 ### Preprocessing
