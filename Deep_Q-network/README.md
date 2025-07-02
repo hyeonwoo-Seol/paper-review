@@ -70,8 +70,13 @@ Agent의 목표는 emulator와 상호작용하면서 미래 보상을 최대화�
 이 알고리즘은 model-free 입니다. 즉, emulator에서 얻은 샘플만을 사용해서 보상 함수와 translation dynamics P(r, s' | s, a)를 명시적으로 추정하지 않고도 강화학습 문제를 해결합니다. 또한 off-policy 방식을 사용해서 행동 정책을 따르면서도 greedy policy인 ![eq9](image/eq9.png)에 대해 학습합니다.
 
 ### Training Algorithm for deep Q-Networks
-----------------------------------------------------------------------------------------------------------------------------------
-여기서부터 시작(논문 7p)
+Algorithm1은 대규모 신경망을 발산 없이 안정적으로 학습시키기 위해 표준 online Q-learning을 다음의 두 가지 방법으로 수정합니다.
+
+우선, Experience Replay라는 기법을 사용합니다. 각 시각의 Agent 경험 e_t =  (s_t, a_t, r_t, s_t+1)을 D_t = {e_1, ..., e_t}라는 데이터셋에 저장하여 여러 에피소드에 걸쳐서 Replay Memory에 축적합니다. 여기서 무작위로 추출된 경험 샘플에 대해 Q-learning 또는 미니배치 업데이트를 적용합니다.
+
+두 번째는 Q-learning 업데이트에서 목표값 y_i를 생성할 때 별도의 네트워크를 사용하는 것입니다. 매 C회 업데이트마다 네트워크 Q를 복제해서 타겟 네트워크 Q\hat을 얻고 이후에 C회의 Q 업데이트 동안 Q\hat을 이용해 목표값 y_i를 생성합니다.
+
+추가적으로 업데이트의 Error term에 ![eq10](image/eq10.png) 를 -1과 1 사이로 clipping 하는 것이 도움이 됩니다.
 
 ## 6. 실험 결과
 ### Evaluation Procedure
