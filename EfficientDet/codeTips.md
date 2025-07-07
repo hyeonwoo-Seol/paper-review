@@ -26,12 +26,23 @@ fin-tuning을 진행했더니 box_loss가 0으로 고정되는 문제가 발생�
 d4 모델로 fine-tuning을 시도했으나 배치 사이즈를 2로 설정했음에도 불구하고 OOM 문제가 발생하였습니다.
 이에 d2 모델로 낮추고 배치 사이즈도 d0 모델의 절반인 2로 설정했을 때 메모리를 최대로 사용하면서 fine-tuning이 가능했습니다.
 
-fine-tuning 첫 1000 step의 경우 loss=0.25, box_loss=0.001, cls_loss=0.1, det_loss=0.15 수준이었지만, step이 점점 늘어날 수록 loss 값이 증가하는 현상을 확인했습니다.
+fine-tuning 첫 1000 step의 경우 loss=0.25, box_loss=0.001, cls_loss=0.1, det_loss=0.15 수준이었지만, 2000 ~ 4000 step 사이에서는 loss 값이 증가하는 현상을 확인했습니다.
+
+하지만 5000 step 부터는 loss 값이 감소하는 것을 확인했습니다.
+```
 2000 step은 l=0.46, b_l=0.003, c_l=0.18, d_l=0.3 
 3000 step은 l=0.38, b_l=0.002, c_l=0.17, d_l=0.29 
 4000 step은 l=0.77 b_l=0.005, c_l=0.30, d_l=0.56 
 5000 step은 l=0.46, b_l=0.002, c_l=0.25, d_l=0.36
-6000 step은 l=0.40, b_l=0.001, c_l=0.21, d_l=0.3
+6000 step은 l=0.40, b_l=0.0019, c_l=0.21, d_l=0.3
+7000 step은 l=0.30, b_l=0.0016, c_l=0.17, d_l=0.25
+8000 step은 l=0.30, b_l=0.0010, c_l=0.15, d_l=0.20
+9000 step은 l=0.46, b_l=0.003, c_l=0.2, d_l=0.36
+```
+
+이러한 현상이 보이는 이유로 추측하기에, EfficientDet이 Cosine decay와 warm-up 학습률 스케줄을 사용하기 때문으로 보입니다. warm-up 단계에서는 학습률이 최대값으로 올라가다가 그 다음부터 cosine 곡선 형태로 감소하기 시작합니다.
+
+또는, KITTI 처럼 데이터가 적은 세트에서는 Learning Rate가 높을 때 모델의 노이즈가 더 크게 반응해서 손실이 불안정하게 높아질 수도 있을 것으로 추측됩니다.
 
 따라서 Learning rate 또는 warmup_steps를 줄여서 실험하고자 합니다.
 
@@ -68,7 +79,6 @@ python main.py \
   --train_batch_size=4 \
   --eval_batch_size=2 \
   --num_epochs=5 \
-  --hparams="mixed_precision=True"
 ```
 
   평가만 하기
@@ -93,5 +103,4 @@ python main.py \
   --eval_batch_size=2 \
   --num_epochs=10 \
   --num_examples_per_epoch=5985 \
-  --hparams="mixed_precision=True"
 ```
