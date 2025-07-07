@@ -28,7 +28,7 @@ d4 모델로 fine-tuning을 시도했으나 배치 사이즈를 2로 설정했�
 
 fine-tuning 첫 1000 step의 경우 loss=0.25, box_loss=0.001, cls_loss=0.1, det_loss=0.15 수준이었지만, 2000 ~ 4000 step 사이에서는 loss 값이 증가하는 현상을 확인했습니다.
 
-하지만 5000 step 부터는 loss 값이 감소하는 것을 확인했습니다.
+하지만 5000 step 부터는 loss 값이 감소하는 것을 확인했습니다. 그러다가 9000 ~ 1000 step에서 증가 후, 11000 step에서 한 번 최저 loss 값을 달성하고 다시 증가하는 모양이 보입니다.
 ```
 2000 step은 l=0.46, b_l=0.003, c_l=0.18, d_l=0.3 
 3000 step은 l=0.38, b_l=0.002, c_l=0.17, d_l=0.29 
@@ -38,15 +38,26 @@ fine-tuning 첫 1000 step의 경우 loss=0.25, box_loss=0.001, cls_loss=0.1, det
 7000 step은 l=0.30, b_l=0.0016, c_l=0.17, d_l=0.25
 8000 step은 l=0.30, b_l=0.0010, c_l=0.15, d_l=0.20
 9000 step은 l=0.46, b_l=0.003, c_l=0.2, d_l=0.36
+10,000 step은 l=0.45, b_l=0.0028, c_l=0.21, d_l=0.36
+11,000 step은 l=0.28, b_l=0.0016, c_l=0.10, d_l=0.18
+12,000 step은 l=0.35, b_l=0.0022, c_l=0.14, d_l=0.25
+13,000 step은 l=0,51, b_l=0.0034, c_l=0.24, d_l=0.417
+14,000 step은 l=0.51, b_l=0.0036, c_l=0.23, d_l=0.413
+15,000 step은 l=0.46, b_l=0.0018, c_l=0.26, d_l=0.36
+16,000 step은 l=0.28, b_l=0.0008, c_l=0.139, d_l=0.183
+17,000 step은 l=0.32, b_l=0.0010, c_l=0.177, d_l=0.228
 ```
 
-이러한 현상이 보이는 이유로 추측하기에, EfficientDet이 Cosine decay와 warm-up 학습률 스케줄을 사용하기 때문으로 보입니다. warm-up 단계에서는 학습률이 최대값으로 올라가다가 그 다음부터 cosine 곡선 형태로 감소하기 시작합니다.
+이를 통해 과적합이나 불안정한 학습이 있음을 확인했습니다.
+GPU VRAM의 용량 한계로 인해 배치사이즈를 2로 선택한 것이, BN 통계(batch mean/var)이 크게 출렁거리면 해당 구간에서 gradient가 불안정해져서 손실 급등이 발생했을 가능성이 있습니다.
 
-또는, KITTI 처럼 데이터가 적은 세트에서는 Learning Rate가 높을 때 모델의 노이즈가 더 크게 반응해서 손실이 불안정하게 높아질 수도 있을 것으로 추측됩니다.
+KITTI 데이터셋은 샘플 수가 많지 않고 장면마다 특징이 달라서, 일정 step마다 미니배치 구성이 달라지면 loss가 요동칠 가능성도 있스비낟.
 
-따라서 Learning rate 또는 warmup_steps를 줄여서 실험하고자 합니다.
+그리고 모델이 가진 표현력에 비해 fine-tuning 데이터가 한계게 도달해 추가 학습에도 큰 개선 여지가 없을 수도 있습니다.
 
-추가적으로 배치정규화를 frozen 시켜서 학습시키고자 합니다. det_model_fn.py에서 is_training_bn=False로 고정시키거나 hparams에 freeze_bn=True를 사용할 수 있습니다.
+Learning Rate 스케줄을 Cosine Decay 대신에 Step decay나 cosine with restart를 사용해볼 수 있습니다.
+
+Fine-tuning시 batch normalization을 frozen 모드 (is_training_bn=False)로 둘 수도 있습니다.
 
 현재 사용하고 있는 GPU 모델은 RTX 3060 TI 8GB 으로, 심각한 VRAM 부족 문제를 겪고 있습니다. 이를 완화하기 위해 입력 해상도를 낮추거나 Gradient Checkpointing을 사용할 수 있습니다.
 
