@@ -23,8 +23,23 @@ fin-tuning을 진행했더니 box_loss가 0으로 고정되는 문제가 발생�
 
 따라서 create_kitti_tf_record.py 내부에 코드 중 width와 height로 나눠서 0,1 범위로 변환하고자 합니다.
 
-9000스텝까지 fine-tuning 해본 결과, 큰 객체 검출은 60% 이상, 중간 객체는 30%, 작은 객체는 4% 수준입니다.
-차량 감지에는 충분히 활용할 수 있지만, 보행자나 자전거 검출을 높여야 할 필요성이 있습니다.
+d4 모델로 fine-tuning을 시도했으나 배치 사이즈를 2로 설정했음에도 불구하고 OOM 문제가 발생하였습니다.
+이에 d2 모델로 낮추고 배치 사이즈도 d0 모델의 절반인 2로 설정했을 때 메모리를 최대로 사용하면서 fine-tuning이 가능했습니다.
+
+fine-tuning 첫 1000 step의 경우 loss=0.25, box_loss=0.001, cls_loss=0.1, det_loss=0.15 수준이었지만, step이 점점 늘어날 수록 loss 값이 증가하는 현상을 확인했습니다.
+2000 step은 l=0.46, b_l=0.003, c_l=0.18, d_l=0.3 
+3000 step은 l=0.38, b_l=0.002, c_l=0.17, d_l=0.29 
+4000 step은 l=0.77 b_l=0.005, c_l=0.30, d_l=0.56 
+5000 step은 l=0.46, b_l=0.002, c_l=0.25, d_l=0.36
+6000 step은 l=0.40, b_l=0.001, c_l=0.21, d_l=0.3
+
+따라서 Learning rate 또는 warmup_steps를 줄여서 실험하고자 합니다.
+
+추가적으로 배치정규화를 frozen 시켜서 학습시키고자 합니다. det_model_fn.py에서 is_training_bn=False로 고정시키거나 hparams에 freeze_bn=True를 사용할 수 있습니다.
+
+현재 사용하고 있는 GPU 모델은 RTX 3060 TI 8GB 으로, 심각한 VRAM 부족 문제를 겪고 있습니다. 이를 완화하기 위해 입력 해상도를 낮추거나 Gradient Checkpointing을 사용할 수 있습니다.
+
+Gradient Checkpointing은 순전파의 activaton을 모두 저장하지 않고 몇몇의 체크포인트 레이어의 출력만 저장해둔 뒤, 역전파 시점에서 다시 순전파하여 activation을 재생성하는 기법입니다. 메모리 사용량을 O(n)에서 O(sqrt(n))으로 줄일 수 있습니다.
 
 Train 데이터셋을 tfrecord로 변환하기
 ```
