@@ -48,18 +48,20 @@ fine-tuning 첫 1000 step의 경우 loss=0.25, box_loss=0.001, cls_loss=0.1, det
 17,000 step은 l=0.32, b_l=0.0010, c_l=0.177, d_l=0.228
 ```
 첨부된 두 이미지를 보면, COCO로만 학습된 D2 모델을 그대로 KITTI에 적용하니, 모든 지표가 0에 근접했습니다.
-제가 16000 step으로 fine-tuning한 D2 모델은 AP 0.43, AP50 0.72, AP 75 0.46을 달성했습니다.
+제가 16,000 step으로 fine-tuning한 D2 모델은 AP 0.43, AP50 0.72, AP 75 0.46을 달성했습니다.
 
 fine-tuning은 zero-shot에 비해 효과적이었으나, 과적합이나 불안정한 학습이 있음을 확인했습니다.
-GPU VRAM의 용량 한계로 인해 배치사이즈를 2로 선택한 것이, BN 통계(batch mean/var)이 크게 출렁거리면 해당 구간에서 gradient가 불안정해져서 손실 급등이 발생했을 가능성이 있습니다.
+GPU VRAM의 용량 한계로 인해 배치사이즈를 2로 선택한 것이, BatchNorm이 매 스텝마다 미니배치로부터 계산하는 평균과 분산이 배치마다 크게 변동한다면 해당 구간에서 gradient가 불안정해져서 손실 급등이 발생했을 가능성이 있습니다. 배치 크기가 2이기 때문에 서로 다른 두 이미지가 매 스탭마다 모델에 동시에 들어가고, 이를 통해 계산된 평균과 분산으로 배치정규화를 수행합니다.
 
-KITTI 데이터셋은 샘플 수가 많지 않고 장면마다 특징이 달라서, 일정 step마다 미니배치 구성이 달라지면 loss가 요동칠 가능성도 있스비낟.
+KITTI 데이터셋은 샘플 수가 많지 않고 장면마다 특징이 달라서, 일정 step마다 미니배치 구성이 달라지면 loss가 요동칠 가능성도 있습니다.
 
 그리고 모델이 가진 표현력에 비해 fine-tuning 데이터가 한계게 도달해 추가 학습에도 큰 개선 여지가 없을 수도 있습니다.
 
 Learning Rate 스케줄을 Cosine Decay 대신에 Step decay나 cosine with restart를 사용해볼 수 있습니다.
 
 Fine-tuning시 batch normalization을 frozen 모드 (is_training_bn=False)로 둘 수도 있습니다.
+
+또한 데이터 증강 기법을 사용하여 학습 데이터셋을 늘리는 방법도 있습니다.
 
 현재 사용하고 있는 GPU 모델은 RTX 3060 TI 8GB 으로, 심각한 VRAM 부족 문제를 겪고 있습니다. 이를 완화하기 위해 입력 해상도를 낮추거나 Gradient Checkpointing을 사용할 수 있습니다.
 
