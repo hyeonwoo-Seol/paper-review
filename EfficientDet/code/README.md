@@ -13,4 +13,4 @@
 
 1번과 2번 방법까지 진행했을 때는 눈에 띄게 Validation Loss가 줄어들지 않았는데, 3번인 훈련 데이터만을 Albumentations로 증강시켰더니 Training Loss와 Validation Loss가 매 Epoch마다 줄어들기 시작했습니다.
 
-최저 loss인 10 epoch부터 다시 훈련을 시작해서, 1.3 -> 0.7 -> 0.58 -> 0.54 -> 0.50 [14 epoch] ->
+최저 loss인 10 epoch부터 다시 훈련을 시작해서, 1.3 -> 0.7 -> 0.58 -> 0.54 -> 0.50 [14 epoch] -> 0.43
