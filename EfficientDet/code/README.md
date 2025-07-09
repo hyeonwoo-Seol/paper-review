@@ -12,7 +12,6 @@
 1. ReduceLROnPlateau 스케줄러를 사용하여 검증 손실이 정체될 때 자동으로 학습률을 낮추기
 2. 옵티마이저에 weight decay를 추가하여 모델의 가중치가 너무 커지지 않도록 규제하기
 3. 데이터 증강하기
-4. 검증 데이터셋 비율을 더 늘리기
 
 
 1번과 2번 방법까지 진행했을 때는 눈에 띄게 Validation Loss가 줄어들지 않았습니다. object detection에서는 증강을 할 때 Albumentations로 진행합니다. 따라서 훈련 데이터만을 Albumentations로 증강시켰더니 Training Loss와 Validation Loss가 매 Epoch마다 줄어들기 시작했습니다.
