@@ -56,10 +56,77 @@ EDAB는 2개의 결로를 가지고 있고, 각 경로는 Local 특징과 Global
 
 하나의 경로는 Decompose Convolution을 통해 Local이고 Short-distance 특징을 처리하며, 다른 하나의 경로는 Atrous Convolution을 통해 GLobal feature Integration을 수행합니다.
 
-이 두 경로에 각각 Channel Attention 과 Dual-Direction Attention을 적용시켜서 다차원 특징 정보를 학습하고 특징 표현력을 향상시켰습니다. 왜냐하면 상당수의 유용한 정보들은 채널 차원에 포함되고, 공간적 특징 정보는 성능향상과 잡은 간섭 억제에 핵심적인 역할을 하기 때문입니다.
+이 두 경로에 각각 Channel Attention 과 Dual-Direction Attention을 적용시켜서 다차원 특징 정보를 학습하고 특징 표현력을 향상시켰습니다. 
+
+> ? 왜냐하면 상당수의 유용한 정보들은 채널 차원에 포함되고, 공간적 특징 정보는 성능향상과 잡은 간섭 억제에 핵심적인 역할을 하기 때문입니다.
+
+최종적으로 두 경로의 출력과 중간 특징은 통합되어 1x1 Point-wise Conv를 통해 원래 차원으로 복원됩니다. 그리고 Channel Shuffle 전략을 적용해서 채널 간 상호 연관성을 형성하고 정보 단편화 문제를 해결합니다.
+
+![eq1](image/eq1.png)
+
+EDAB의 세부적 연산은 위와 같습니다. x는 EDAB의 입력, Y는 EDAB의 출력 특징맵, Conv_k*k()는 일반적인 k x k Conv 연산입니다. D는 Depth-wise Conv 이고, R은 Atrous Conv의 팽창 비율이고, CA는 Channel Attention이고, DDA는 Dual-Direction Attention이고, CS는 Channel Shuffle 입니다.
+
+### Multi-Scale Attention Unit
+Semantic Segmentation은 저수준의 공간정보와 고수준의 의미 정보를 결합하는 것이 효율적입니다. 이에 U-Net의 구조를 참고해서 고수준 특징맵과 저수준 특징맵을 Same-Resolution Connections를 사용해서 통합합니다.
+
+3개의 MSAU를 사용해서 장거리 연결을 했습니다. 하나의 MSAU는 2개의 경로로 구성되는데, Multi-Scale Spatial Aggregation 과 Channel Aggregation 으로 구성됩니다.
+
+MSAU는 Multi-Scale Spatial Aggretation과 Channel Aggregation의 출력들을 곱하고 이를 원래 입력 특징맵에 더해서 최종 출력 특징맵을 생성합니다. 이를 통해 저수준 공간 정보와 고수준 의미 정보를 효과적으로 융합하고 특징 표현력을 향상시킵니다.
+
+![eq2](image/eq2.png)
+
+위 eq2에서, x는 MSAU의 입력, Y는 MSAU의 출력 특징맵, Conv_kxk()는 k x k Conv 연산입니다. ⊗ 는 Element-wise Multiplication이고, Pool()은 Adaptive Average Pooling, AvgPool()은 Average Pooling, MaxPool()은 Maximum Pooling, ReLU()는 Recified Linear Unit, Sigmoid()는 Sigmoid 활성화 함수를 의미합니다.
+
+#### Multi-Scale Spatial Aggretation
+Multi-Scale Spatial Aggregation은 1x1 Conv를 사용해서 입력 특징 맵의 C 채널을 C/2 채널로 변환합니다. 이를 통해 파라미터 수와 계산량을 줄이는 동시에 Multi-Scale Feature Extraction을 유지합니다.
+
+그 다음에 3x3, 5x5, 7x7 크기의 Depth-spearable Conv를 통과시켜서 Multi-Scale 특징 정보를 얻고, 이를 통해 Multi-Scale Percption을 강화합니다.
+
+이렇게 만들어진 7x7 특징 맵은 Adaptive Average Pooling을 통과해서 세로 차원을 1로 압축합니다.
+그리고 아까 만들어둔 7x7 특징맵에 1x1 Conv를 적용시킨 뒤 sigmoid 활성화 함수를 거쳐서 Spatial Attention Map을 생성합니다.
+
+이렇게 생성된 Spatial Attenton Map을 세로 차원이 1로 압축된 특징맵에 곱합니다. 이를 통해 중요한 공간 영역을 강조하고 불필요한 정보를 억제합니다.
+
+그리고 마지막으로 1x1 Conv를 사용하여 채널 수를 C/2 에서 C로 복구시킵니다. 이렇게 만들어진 Attention Map은 특징맵의 위치에 대한 중요도를 반영합니다.
+
+#### Channel Aggregation
+입력 특징 맵에 Average Pooling과 Maximum Pooling을 각각 적용시키고, 이에 대한 평균 및 최대 채널 특징 맵을 얻은 뒤 이 두 특징맵을 통해 다양한 관점에서의 Channel Statistics를 포착합니다.
+
+
+### Feature Fusion Model
+Mamba를 기반으로 Feature Fusion Model을 설계했고, 2D-Selective-Scan(SS2D)를 사용해서 Global 표현을 더 적은 네트워크 파라미터와 계산량으로 효과적으로 포착했습니다.
+
+FFM은 MSAU와 인코더로부터 Multi-Level 특징 정보를 Concatenate 연산을 통해 통합합니다. 이를 통해 Feature Diversity를 풍부하게 합니다.
+
+그 다음에 SS2D 블록은 일련의 선형 변환과 2D Conv 연산을 통해 특징을 추가적으로 추출하고 융합합니다. 이를 과정에서 Selective Scanning Mechanism을 적용시켜서 특징 표현력을 향상시킵니다.
+
+마지막에는 Feed-Forward Network로 비선형 변환을 수행하고, 특징의 가중치 분포를 조정함으로써 핵심 특징은 강조하고 중복 정보는 억제합니다. 이를 통해 복잡한 작업을 효과적으로 처리하게 됩니다.
+
+이렇게 설계된 FFN은 다중 스케일 특징을 효과적으로 융합하고 Local Detail 정보와 Overall Semantic 특징을 동시에 포착합니다. 이를 통해 Semantic Segmentation 작업에서 모델의 성능을 향상시킬 수 있습니다.
+
+![eq3](image/eq3.png)
+
+위 수식에서 x_encoder, x_MSAU1, x_MSAU2는 각 인코더와 MSAS의 출력을 의미합니다. Y는 FFM의 출력 특징맵, Concat()은 Concatenation Operation, SS2D()는 2D-selective-scan 블록, FFN()은 Feed-forward Network를 의미합니다. 
 
 ## 실험 결과
+Cityscapes 데이터셋과 CamVid 데이터셋을 사용했습니다.
+
+### Ablation Experiments
+![Table1](image/Table1.png)
+
+Long Skip Connections를 하나씩 추가하면서 영향을 관찰한 결과, 얕은 계층 정보인 Line1(Low-level)이 0.61% 성능향상을 보여서, Semantic Feature Reconstruction에 효과적으로 기여한다는 것을 확인했습니다. 3개의 Long Skip Connections를 모두 사용하면 1.29%의 mIoU 향상이 나타났고, 이 3개의 line들이 Semantic Segmentation에서 중요한 역할을 한다고 확인했습니다.
+
+Long Skip Connections에 MSAU 모듈을 추가해서 성능 변화를 관찰한 결과, line1만 사용했을 때 보다 line1에 MSAU를 같이 사용한 것이 mIoU를 더 향상시켰습니다. (mIoU 0.62% vs 0.92%) 하지만 MSAU를 추가함으로 인해 9.43K의 파라미터가 증가했습니다.
+
+Line1에 MSAU를 같이 사용하고 FFM까지 도입하게 되면 mIoU가 1.11% 향상되었습니다. (mIoU 0.62% vs 0.92% vs 1.11%) 3개의 line과 3개의 MSAU와 1개의 FFM을 사용할 경우 최종적으로 3.7%의 mIoU 향상을 확인했습니다.
+
 
 ## 결론
 
+
+
+
 ## 느낀점
+
+
+
