@@ -2,7 +2,8 @@
 ## 논문 정보
 제목: ECMNet:Lightweight Semantic Segmentation with Efficient CNN-Mamba Network
 
-저자: 
+저자: Feixiang Du, Shengkun Wu
+
 ## Abstract 요약
 이 논문은 Efficient CNN-Mamba Network for Semantic Segmentation이라고 불리는 경량화된 네트워크를 제안합니다.
 
@@ -60,7 +61,9 @@ EDAB는 2개의 결로를 가지고 있고, 각 경로는 Local 특징과 Global
 
 이 두 경로에 각각 Channel Attention 과 Dual-Direction Attention을 적용시켜서 다차원 특징 정보를 학습하고 특징 표현력을 향상시켰습니다. 
 
-> ? 왜냐하면 상당수의 유용한 정보들은 채널 차원에 포함되고, 공간적 특징 정보는 성능향상과 잡은 간섭 억제에 핵심적인 역할을 하기 때문입니다.
+채널은 서로 다른 종류의 패턴을 인코딩하여 이미지 내의 다양한 의미적 정보를 분리하고 저장합니다. 따라서 상당수의 유용한 정보들이 채널 차원에 포함됩니다. 그러므로 Channel Attention을 적용시켰습니다.
+
+이미지 내의 중요한 객체나 경계는 특정 공간에 집중되어 있기 때문에, Spatial Attention을 통해 핵심 영역을 강조하면서 모델이 의미 있는 구조를 학습할 수 있습니다. 동시에 배경이나 노이즈 같은 불필요한 정보는 억제해서 잡음 간섭을 줄이고, 더 안정적인 특징 표현을 얻습니다. 이러한 이유로 Dual-Direction Attention을 적용시켰습니다.
 
 최종적으로 두 경로의 출력과 중간 특징은 통합되어 1x1 Point-wise Conv를 통해 원래 차원으로 복원됩니다. 그리고 Channel Shuffle 전략을 적용해서 채널 간 상호 연관성을 형성하고 정보 단편화 문제를 해결합니다.
 
