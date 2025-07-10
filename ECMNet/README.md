@@ -29,16 +29,18 @@ Mamba는 선형 복잡도의 효율적인 시퀀스 모델링을 통해 고해�
 
 ## 핵심 아이디어
 ### U자형 CNN 인코더-디코더 구조 (Backbone)
-이 구조를 통해 세부족인 공간 표현을 위한 Localized Features를 추출합니다.
-
-### Feature Fusion Module (FFN) + SS2D Block
-State Space Model (SSM)을 활용해서 복잡한 공간 정보와 장거리 의존성을 포착하고 Global Feature Representation 과 계산 복잡도를 최적화합니다.
+이 구조를 통해 세부적인 공간 표현을 위한 Localized Features를 추출합니다. 인코더와 디코더는 Long-Skip Connections과 MSAU와 FFN으로 이어져 있습니다.
 
 ### Enhanced Dual-Attention Block (EDAB)
-서로 다른 수준의 특징 정보를 효과적으로 포착하면서 네트워크 파라미터 수를 최소화하도록 설계된 블록입니다.
+인코더와 디코더 안에 존재하고, 서로 다른 수준의 특징 정보를 효과적으로 포착하면서 네트워크 파라미터 수를 최소화하도록 설계된 블록입니다.
+
+### Feature Fusion Module (FFM) + SS2D Block
+State Space Model (SSM)을 활용해서 복잡한 공간 정보와 장거리 의존성을 포착해서 Global Feature Representation 과 계산 복잡도를 최적화합니다.
+
+Concatenation과 SS2D와 FFN으로 구성되어 있습니다.
 
 ### Multi-Scale Attention Unit (MSAU)
-저수준 Spatial 정보와 고수준 Semantic 정보에 집중해서 더 높은 품질의 분할 결과를 생성합니다.
+Long-Skip Connections에 삽입되며, 저수준 Spatial 정보와 고수준 Semantic 정보에 집중해서 더 높은 품질의 분할 결과를 생성합니다.
 
 ## 방법론
 ![Figure1](image/Figure1.png)
@@ -96,6 +98,8 @@ Multi-Scale Spatial Aggregation은 1x1 Conv를 사용해서 입력 특징 맵의
 ### Feature Fusion Model
 Mamba를 기반으로 Feature Fusion Model을 설계했고, 2D-Selective-Scan(SS2D)를 사용해서 Global 표현을 더 적은 네트워크 파라미터와 계산량으로 효과적으로 포착했습니다.
 
+FFM은 Capsule-based Framework로 구성되었습니다.
+
 FFM은 MSAU와 인코더로부터 Multi-Level 특징 정보를 Concatenate 연산을 통해 통합합니다. 이를 통해 Feature Diversity를 풍부하게 합니다.
 
 그 다음에 SS2D 블록은 일련의 선형 변환과 2D Conv 연산을 통해 특징을 추가적으로 추출하고 융합합니다. 이를 과정에서 Selective Scanning Mechanism을 적용시켜서 특징 표현력을 향상시킵니다.
@@ -120,11 +124,36 @@ Long Skip Connections에 MSAU 모듈을 추가해서 성능 변화를 관찰한 
 
 Line1에 MSAU를 같이 사용하고 FFM까지 도입하게 되면 mIoU가 1.11% 향상되었습니다. (mIoU 0.62% vs 0.92% vs 1.11%) 3개의 line과 3개의 MSAU와 1개의 FFM을 사용할 경우 최종적으로 3.7%의 mIoU 향상을 확인했습니다.
 
+### Dataset Evaluation
+![Tabel2](image/Tabel2.png)
+
+Cityscapes 데이터셋에서, 
+많은 파라미터와 연산량을 가진 모델은 뛰어난 Semantic Segmentation 성능을 보였고, 경량화 모델은 높은 계산 효율성을 보였습니다.
+
+하지만 전자의 경우 계산 복잡도가 높고 동작 속도가 느리고, 후자의 경우 전반적인 성능에서 부족한 모습을 보였습니다.
+
+ESPNet은 가장 적은 파라미터 수로 60.3% mIoU를 달성했지만, ECMNet보다 낮은 성능입니다. ECMNet은 0.87M개의 파라미터로 70.6%의 mIoU를 달성했습니다. 이러한 이유로는 잘 설계된 구조와 Mamba의 활용 덕분이며, 모델의 크기와 성능 사이의 균형을 잘 달성했음을 의미합니다.
+
+![Table3](image/Table3.png)
+
+CamVid 데이터셋에서 ECMNet은 적은 파라미터로 최고 정확도를 달성했습니다.
+
+CamVid 데이터셋이 Cityscapes 데이터셋보다 높은 성능을 달성한 이유는 다음과 같습니다. ECMNet이 소규모 데이터셋의 특징을 보다 효과적으로 포착할 수 있기 때문입니다.
+
+![Table4](image/Table4.png)
+
+클래스별 결과는 위 Table4와 같습니다.
 
 ## 결론
+ECMNet은 Mamba와 CNN을 결합한 경량화 Semantic Segmentation입니다.
 
+CNN의 Local 특징 추출 능력과 Mamba의 Lone-range Dependency를 융합하여 모델링했습니다.
 
+FFM을 도입해서 Global 특징 정보를 효과적으로 포착했고, CNN 내부에 EDAB를 사용해서 단순한 구조와 경량성을 유지하면서 더 많은 Lcoal 특징 정보를 학습하게 했습니다.
 
+CNN 인코더 - 디코더 사이에 Multi-scale Long Connections와 MSAU를 사용하여 지역 특징 정보 손실을 보완하고 판별력 있는 특징을 강화하며 노이즈를 억제했습니다.
+
+이를 통해 모델의 크기와 성능 사이의 균형을 잘 달성했습니다.
 
 ## 느낀점
 
