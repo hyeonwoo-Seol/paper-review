@@ -53,9 +53,9 @@ Figure1을 보면, CNN 인코더와 디코더는 EDAB로 개선된 모습이 보
 ### 인코더 - 디코더
 입력 특징은 1x1 Conv를 활용한 Bottleneck 구조를 통과해서 채널 수를 절반으로 줄입니다. 이를 통해 연산 복잡도와 파라미터 수를 크게 감소시킵니다.
 
-1x1 Conv를 사용하지 않고, 3x1 과 1x3 Conv를 사용할 수도 있습니다. 이렇게 2개로 분리시켜두면 더 넓은 Recpetive Field를 확보하고 더 넓은 Contextual Feature를 포착할 수 있으며, 모델의 파라미터 수와 계산량도 타협할 수 있습니다.
+1x1 Conv를 사용한 뒤, 3x1 과 1x3 Conv를 사용합니다. 이렇게 2개로 분리시켜두면 더 넓은 Recpetive Field를 확보하고 더 넓은 Contextual Feature를 포착할 수 있으며, 모델의 파라미터 수와 계산량도 타협할 수 있습니다.
 
-EDAB는 2개의 결로를 가지고 있고, 각 경로는 Local 특징과 Global 특징을 포착합니다.
+그 다음에 EDAB는 2개의 경로로 나뉘게 되고, 각 경로는 Local 특징과 Global 특징을 포착합니다.
 
 하나의 경로는 Decompose Convolution을 통해 Local이고 Short-distance 특징을 처리하며, 다른 하나의 경로는 Atrous Convolution을 통해 GLobal feature Integration을 수행합니다.
 
