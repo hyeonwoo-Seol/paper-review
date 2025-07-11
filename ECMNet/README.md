@@ -87,10 +87,10 @@ Multi-Scale Spatial Aggregation은 1x1 Conv를 사용해서 입력 특징 맵의
 
 그 다음에 3x3, 5x5, 7x7 크기의 Depth-spearable Conv를 통과시켜서 Multi-Scale 특징 정보를 얻고, 이를 통해 Multi-Scale Percption을 강화합니다.
 
-이렇게 만들어진 7x7 특징 맵은 Adaptive Average Pooling을 통과해서 세로 차원을 1로 압축합니다.
-그리고 아까 만들어둔 7x7 특징맵에 1x1 Conv를 적용시킨 뒤 sigmoid 활성화 함수를 거쳐서 Spatial Attention Map을 생성합니다.
+입력 x를 Adaptive Average Pooling을 통과해서 세로 차원을 1로 압축합니다.
+그리고 7x7 Conv와 sigmoid 활성화 함수를 거친 뒤, 1x1 Conv를 거치면 Spatial Attention Map을 생성합니다.
 
-이렇게 생성된 Spatial Attenton Map을 세로 차원이 1로 압축된 특징맵에 곱합니다. 이를 통해 중요한 공간 영역을 강조하고 불필요한 정보를 억제합니다.
+이렇게 생성된 Spatial Attenton Map을 Multi-Scale 특징맵에 곱합니다. 이를 통해 중요한 공간 영역을 강조하고 불필요한 정보를 억제합니다.
 
 그리고 마지막으로 1x1 Conv를 사용하여 채널 수를 C/2 에서 C로 복구시킵니다. 이렇게 만들어진 Attention Map은 특징맵의 위치에 대한 중요도를 반영합니다.
 
@@ -128,7 +128,7 @@ Long Skip Connections에 MSAU 모듈을 추가해서 성능 변화를 관찰한 
 Line1에 MSAU를 같이 사용하고 FFM까지 도입하게 되면 mIoU가 1.11% 향상되었습니다. (mIoU 0.62% vs 0.92% vs 1.11%) 3개의 line과 3개의 MSAU와 1개의 FFM을 사용할 경우 최종적으로 3.7%의 mIoU 향상을 확인했습니다.
 
 ### Dataset Evaluation
-![Tabel2](image/Tabel2.png)
+![Tabel2](image/Table2.png)
 
 Cityscapes 데이터셋에서, 
 많은 파라미터와 연산량을 가진 모델은 뛰어난 Semantic Segmentation 성능을 보였고, 경량화 모델은 높은 계산 효율성을 보였습니다.
