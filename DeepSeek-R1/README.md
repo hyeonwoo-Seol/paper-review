@@ -19,11 +19,23 @@ R1-Zero는 순수한 강화 학습만을 사용하여 언어 모델의 추론 �
 하지만 가독성이 낮고 여러 국가의 다양한 언어가 혼합되는 문제점이 발생했습니다
 ## 핵심 아이디어
 ### Reinforcement Learning
+Agent가 환경과 상호작용하면서 보상을 최대화하기 위해 학습하는 방식입니다. Agent가 환경과 상호작용하면서 상태(s)를 관찰하고 행동 (a)를 선택합니다.
+
+선택한 행동의 결과로 보상을 받고 이후 상태로 전달됩니다.
+
+RL의 목표는 장기적인 누적 보상을 최대화하는 정책을 학습하는 것입니다.
 
 ### Cold Start
-Cold Start는 초기 모델의 학습을 위해 첫 번째 데이터셋을 준비하는 과정을 의미합니다.
+Cold Start는 RL을 시작하기 전에 일정한 양의 고품질 데이터로 Supervised Fine-Tuning을 먼저 수행하는 것입니다.
+
+Cold Start 없이 학습을 시작했을 때의 불안정한 학습 초기 단계를 Cold Start를 사용하여 피할 수 있습니다.
+
+초기의 안정된 추론 능력을 갖추면 RL의 훈련 속도가 빨라지고 결과의 품질이 좋아집니다.
 
 ### SFT(Supervised-Fine-Tuning)
+지도 학습 방식으로 모델을 미세 조정하는 과정입니다.
+
+RL을 시작하기 전에 Chain-of-Thought 데이터를 사용해서 SFT를 수행합니다. 그리고 RL이 수렴한 뒤에 해당 체크포인트를 사용해서 새로 정답이 검증된 출력들을 수집하고, 이를 사용해서 SFT를 수행하여 더 넓은 도메인에 대응합니다.
 
 ## 방법론
 R1이 Cold-Start를 진행하기 위해, 소량의 긴 Chain-of-Thought Data를 구축하고 수집합니다. 여기서 CoT Data란, 모델이 복잡한 문제를 풀 때 논리적 사고 과정을 포함한 데이터를 말합니다.
@@ -32,9 +44,11 @@ R1이 Cold-Start를 진행하기 위해, 소량의 긴 Chain-of-Thought Data를 
 
 이러한 CoT Data를 모으기 위해, 모델에게 CoT 데이터 예제 몇 개를 보여주고 이를 바탕으로 모델이 긴 CoT 답변을 생성하도록 유도하는 Few-Short Prompting 방법과, 모델에게 자기검증(reflection and verification)을 요구하여 구체적인 답변을 생성하도록 직접 Prompt를 제공하는 방법과, R1 Zero의 출력을 읽을 수 있는 포멧으로 모으는 방법과 사람에 의한 후처리를 통해 출력을 정제하는 방법을 사용합니다.
 
-이를 통해 약 1000개의 Cold-Start Data가 모았습니다
+이를 통해 수천개의 Cold-Start Data가 모았습니다
 
-Cold-Start와 Reinforcement Learning을 진행하여 논리적 추론 능력을 학습한 뒤, 이 모델을 사용하여 더 많은 학습 데이터를 수집하고 SFT(Supervised-Fine-Tuning)을 적용하여 모델의 성능을 개선합니다.
+Cold-Start와 Reinforcement Learning을 진행하여 논리적 추론 능력을 학습합니다. 이 때 CoT의 언어 혼합을 줄이기 위해 언어 일관성 보상을 사용합니다.
+
+이렇게 학습된 모델을 사용하여 더 많은 학습 데이터를 수집하고, SFT(Supervised-Fine-Tuning)을 적용하여 모델의 성능을 개선합니다.
 
 효과적으로 SFT를 수행하기 위해 고품질 학습 데이터가 필요한데, 추론 데이터와 비추론 데이터로 나누어 생성하고자 합니다.
 
@@ -51,11 +65,14 @@ Cold-Start와 Reinforcement Learning을 진행하여 논리적 추론 능력을 
 Helpfulness는 답변의 최종 요약에 초점을 맞춰 평가 했으며, 추론 과정에 영향을 최소로 주도록 설정했습니다. Harmlessness는 모델이 생성한 전체 답변을 평가했고, Helpfulness와 다르게 추론 과정과 요약이 모두 포함됩니다.
 
 ## 실험 결과
-MMLU, MMLU-Redux, MMLU-Pro, C-Eval, CMMLU, IFEval, FRAMES, GPQA Diamond, SimpleQA, C-SimpleQA, SWE-Bench Verified, Aider, LiveCodeBench, Codeforces, Chinese National High School Mathematics Olympiad, American Invitational Mathematics Examination에서 모델을 평가했고, 표준 벤치마크 이외에도 LLM을 평가자로 활용하여 Open-ended Generation 작업에서 모델을 평가했습니다.
+![Table4](image/Table4.png)
 
-V3의 설정값에 따라, MMLU, GPQA Diamond, SimpleQA와 같은 표준 벤치마크는 simpleEvals 프레임워크의 프롬프트를 사용하여 평가됐습니다. MMLU-Redux의 경우, Zero-Shot 설정에서 Zero-Eval 프롬프트 형식을 채택했으며, MMLU-Pro, C-Eval의 경우, 원래는 Few-shot이었으나 성능 저하의 가능성으로 인해 Zero-shot 설정으로 평가했습니다. 코드 및 수학 벤치마크의 경우, HumanEval-Mul 데이터셋은 8개의 주요 프로그래밍 언어를 포함합니다. LiveCodeBench에서 모델 성능은 CoT 형식을 사용하여 평가됐습니다. SWE-Bench 검증 결과는 agentless 프레임워크를 통해 확보했고, AIDER 관련 벤치마크는 “diff” 형식을 사용하여 측정됐습니다. 각 벤치마크에서 R1의 출력은 최대 32,768 토큰으로 제한됩니다.
+Claude-Sonnet, GPT-4o, OpenAI-o1 등을 포함한 여러 강력한 기준 모델들과 비교하여 종합적인 평가를 수행했습니다
 
-또한 Claude-Sonnet, GPT-4o, OpenAI-o1 등을 포함한 여러 강력한 기준 모델들과 비교하여 종합적인 평가도 수행했습니다
+![Table5](image/Table5.png)
+
+DeepSeek-R1의 출력을 증류하여 경량화된 DeepSeek-R1-*B에 대한 평가를 수행했습니다.
+
 ## 결론
 이 논문은 Reinforcement Learning을 통해 모델의 추론 능력을 향상시키는 과정을 연구했습니다. R1 Zero는 Cold Start 데이터에 의존하지 않은 순수한 RL이지만, R1은 Cold Start 데이터와 반복적인 RL Fine-Tuning을 결합하여 더 강력한 성능을 보였습니다. 그 결과, R1은 다양한 과업에서 o1과 동등한 성능을 보였습니다.
 
