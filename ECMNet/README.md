@@ -123,9 +123,9 @@ Cityscapes 데이터셋과 CamVid 데이터셋을 사용했습니다.
 
 Long Skip Connections를 하나씩 추가하면서 영향을 관찰한 결과, 얕은 계층 정보인 Line1(Low-level)이 0.61% 성능향상을 보여서, Semantic Feature Reconstruction에 효과적으로 기여한다는 것을 확인했습니다. 3개의 Long Skip Connections를 모두 사용하면 1.29%의 mIoU 향상이 나타났고, 이 3개의 line들이 Semantic Segmentation에서 중요한 역할을 한다고 확인했습니다.
 
-Long Skip Connections에 MSAU 모듈을 추가해서 성능 변화를 관찰한 결과, line1만 사용했을 때 보다 line1에 MSAU를 같이 사용한 것이 mIoU를 더 향상시켰습니다. (mIoU 0.62% vs 0.92%) 하지만 MSAU를 추가함으로 인해 9.43K의 파라미터가 증가했습니다.
+Long Skip Connections에 MSAU 모듈을 추가해서 성능 변화를 관찰한 결과, line1만 사용했을 때 보다 line1에 MSAU를 같이 사용한 것이 mIoU를 더 향상시켰습니다. (mIoU 0.62% vs 1.53%) 하지만 MSAU를 추가함으로 인해 9.43K의 파라미터가 증가했습니다.
 
-Line1에 MSAU를 같이 사용하고 FFM까지 도입하게 되면 mIoU가 1.11% 향상되었습니다. (mIoU 0.62% vs 0.92% vs 1.11%) 3개의 line과 3개의 MSAU와 1개의 FFM을 사용할 경우 최종적으로 3.7%의 mIoU 향상을 확인했습니다.
+3개의 line과 3개의 MSAU와 1개의 FFM을 사용할 경우 최종적으로 3.7%의 mIoU 향상을 확인했습니다.
 
 ### Dataset Evaluation
 ![Tabel2](image/Table2.png)
