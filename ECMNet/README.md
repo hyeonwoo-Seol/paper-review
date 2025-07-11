@@ -159,6 +159,6 @@ CNN 인코더 - 디코더 사이에 Multi-scale Long Connections와 MSAU를 사�
 이를 통해 모델의 크기와 성능 사이의 균형을 잘 달성했습니다.
 
 ## 느낀점
+이 논문에서 발표한 ECMNet은 Speed(FPS)가 43으로 낮은 쪽에 속합니다. LETNet은 파라미터 수가 ECMNet보다 0.08M이 더 많고 FLOPS가 5.33G 더 많지만 Speed가 약 3배 더 빠르고 mIoU는 2.2%p 더 정확합니다.
 
-
-
+ECMNet에 TensorRT 같은 컴파일러 최적화를 고려해서 텐서 코어를 최대한 활용하게 만들고, Dual-Direction Attention과 SS2D 대신 다른 저비용 Attention을 시도해본다면 Speed를 높일 수 있지 않을까 생각합니다.
