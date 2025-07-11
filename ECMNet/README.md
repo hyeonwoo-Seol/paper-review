@@ -76,7 +76,7 @@ Semantic Segmentation은 저수준의 공간정보와 고수준의 의미 정보
 
 3개의 MSAU를 사용해서 장거리 연결을 했습니다. 하나의 MSAU는 2개의 경로로 구성되는데, Multi-Scale Spatial Aggregation 과 Channel Aggregation 으로 구성됩니다.
 
-MSAU는 Multi-Scale Spatial Aggretation과 Channel Aggregation의 출력들을 곱하고 이를 원래 입력 특징맵에 더해서 최종 출력 특징맵을 생성합니다. 이를 통해 저수준 공간 정보와 고수준 의미 정보를 효과적으로 융합하고 특징 표현력을 향상시킵니다.
+MSAU는 Multi-Scale Spatial Aggregation과 Channel Aggregation의 출력들을 곱하고 이를 원래 입력 특징맵에 더해서 최종 출력 특징맵을 생성합니다. 이를 통해 저수준 공간 정보와 고수준 의미 정보를 효과적으로 융합하고 특징 표현력을 향상시킵니다.
 
 ![eq2](image/eq2.png)
 
