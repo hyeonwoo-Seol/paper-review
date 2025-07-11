@@ -17,6 +17,7 @@ resolution, depth, width를 Backbone, Feature Network, Box/Class Prediction Netw
 ## 4. 핵심 아이디어
 ![Figure2: Feature network desing](image/Figure2.png)
 
+### Weighted Bi-directional Feature Pyramid Network (BiFPN)
 Figure2는 다중 스케일 융합을 구현하는 대표적인 네 가지 네트워크 입니다. 기존의 연구들은 서로 다른 스케일의 특징을 융합하기 위해, 서로 다른 해상도의 입력 특징들을 단순히 더했습니다. 이는 각 특징이 융합된 출력에 기여하는 비중이 동등하지 않다는 것을 고려하지 않았기 때문에,
 
 이 논문은 weighted bi-directional feature pyramid network (BiFPN)을 제안합니다.
@@ -27,8 +28,10 @@ BiFPN은 학습 가능한 가중치를 도입하여 각 입력 특징의 중요�
 
 BiFPN은 위의 Figure2(d)의 구조를 가지고 있고, 수식은 ![eq1: BiFPN eq](image/eq1.png) 입니다. 이 수식에서 Resize(P^in_7)을 통해 사이즈를 업샘플링합니다. Resize(P^out_5)를 통해 사이즈를 다운샘플링합니다. Conv()를 통해 Depthwise Separable Convolution을 적용하고 Batch Normalization과 Activation을 수행합니다.
 
+### Compound Scaling
 Object detection을 위한 compound scaling 기법을 통해, resolution, depth, width를 backbone, feature network, box/class prediction network 전체에 걸쳐서 확장합니다.
 
+### One-Stage Detector
 one-stage detector design은 two-stage detector design 보다 정확도는 낮지만 단순하고 효율적입니다. 이 논문은 주로 one-stage detector design을 사용하면서 효율성과 높은 정확도를 달성함을 보여줍니다.
 
 One-stage detector는 SSD나 YOLO와 같은 것으로, 사전에 정의된 Anchor들 위에서 단일 네트워크가 바로 각 위치마다 객체 유무와 클래스 점수와 박스 좌표를 예측합니다. Two-Stage Detector는 R-CNN과 같은 것으로, 관심 영역을 추출하는 RPN 단계와 각 제안 영역에 대해 분류나 위치 보정을 수행하는 단계로, 총 2단계로 구성되어 있습니다.
