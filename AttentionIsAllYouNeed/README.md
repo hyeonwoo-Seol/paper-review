@@ -19,7 +19,27 @@
 이러한 문제점을 해결하기 위해 self-Attention 매커니즘과 Transformer를 제안했습니다.
 
 ## 핵심 아이디어
+### Position Encoding
+언어는 순서에 따라 의미가 결정되기 때문에, 의미를 구별하기 위해서는 토큰의 순서 정보가 필요합니다.
+
+input embedding만으로는 토큰의 순서를 알 수 없어서, 토큰의 순서 정보를 사용하기 위해 Position Encoding을 사용합니다.
+
+Transformer에서는 사인 코사인 함수를 사용한 fixed Positional Encoding을 사용합니다.
+
 ### Self-Attention
+동일한 시퀀스 내의 토큰들이 서로 참조하면서 각 위치의 표현을 갱신하는 기법입니다.
+
+시퀀스란, 모델에 입력되는 토큰들의 순서 있는 나열입니다. 5개의 단어로 이루어진 문장은 5개의 토큰으로 이루어진 시퀀스입니다.
+
+입력 시퀀스의 각 위치에서 선형 투영을 통해 Queary, Key, Value 벡터를 만들기 때문에 Self 라는 단어가 붙었습니다.
+
+Self-Attention을 통해 거리가 먼 시퀀스 사이의 관계를 효과적으로 학습할 수 있고, 연산의 병렬 처리가 가능합니다.
+
+### Masked Multi-head Attention
+미래 토큰 정보를 참조하지 않도록 softmax 계산을 할 때, 해당 위치 이후의 토큰들을 -무한대로 마스킹해서 auto-regressive 특성을 유지합니다.
+
+auto-regressive는 지금까지 생성된 값들에만 의존하여 다음 값을 예측하는 방식입니다.
+
 ## 방법론
 ### Transformer
 ![Figure1](image/Figure1.png)
@@ -56,8 +76,35 @@ Scaled-Dot Product Attention의 수식은 다음과 같습니다:
 
 ![eq1](image/eq1.png)
 
+그 다음에 h개의 Attention 결과를 이어붙이고 최종적으로 다시 Linear Projection을 수행하여 최종 출력 값을 만듭니다.
+
+인코더의 첫 번째 Sub Layer인 Multi-Head Self-Attention에서는 입력 시퀀스의 모든 위치마다 동일한 입력을 Qeury, Key, Value로 사용하고 시퀀스 내의 서로 다른 위치 간의 의존성을 학습합니다. 
+
+### Transformer Decoder
+디코더의 첫 번째 Sub Layer인 Masked Multi-Head Attention에는 미래의 위치를 알 수 없게 하기 위해 마스킹을 적용하고 현재 위치의 이전 토큰들만 참조하게 합니다.
+
+디코더의 두 번째 Sub Layer인 Multi-Head Attention에서는 디코더가 생성한 Query와 인코더에서 나온 Key와 Value를 사용하여 디코더의 각 위치가 입력 문장 내에 모든 위치를 참조할 수 있게 합니다. 
+
+디코더의 세 번째 Sub Layer인 Feed-Forward Network는 각 위치별로 동일한 2개의 완전 연결 네트워크를 적용시킵니다. 이 네트워크는 ReLU 활성화를 사이에 둔 2개의 선형 변환으로 구성되고, 수식은 다음과 같습니다:
+
+![eq2](image/eq2.png)
+
+이 선형 변환은 서로 다른 위치에 동일하게 적용되지만 레이어마다 서로 다른 매개변수를 사용합니다.
+
+추가적으로, 입력과 출력의 토큰을 벡터로 변환하기 위해 Learned Embedding을 사용했고, 시퀀스의 순서를 활용하기 위해 인코더와 디코더의 하단 입력 임베딩에 Position Encoding을 추가했습니다.
+
+Position Encoding은 입력 임베딩과 동일한 차원을 가지기 때문에 이 둘을 합칠 수 있습니다. Position Encoding 방식에는 다양한 방식이 있는데, 이 논문에서는 사인 함수와 코사인 함수를 사용하여 Position Encoding을 정의했습니다.
+
+이는 위치 정보를 주기적 주파수 함수로 표현해서 모델이 상대적인 위치를 잘 학습하도록 도와줍니다.
+
 ## 실험 결과
 
 ## 결론
+계산 복잡도 측면에서 Recurrent Layer 보다 Self-Attention Layer가 더 빠르고, Convolu-tion Layer보다 Self-Attention Layer가 계산 비용이 더 저렴합니다.
+
+Self-Attention은 더 해석 가능한(interpretable) 모델을 만들 가능성이 있습니다. 
+
+기계 번역에서 Transformer는 Recurrent와 Convolutional 보다 빠르게 학습되고 좋은 성능을 보여줬고, 앙상블(Ensemble) 모델보다 성능이 더 뛰어납니다.
+
 
 ## 느낀점
