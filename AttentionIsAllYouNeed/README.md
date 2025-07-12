@@ -42,7 +42,7 @@ auto-regressive는 지금까지 생성된 값들에만 의존하여 다음 값�
 
 ## 방법론
 ### Transformer
-![Figure1](image/Figure1.png)
+![Figure1](image/Figure1-1.png)
 
 ### Transformer Encoder
 Transformer 모델은 6개의 인코더와 6개의 디코더로 이루어진 모델입니다. 인코더에는 총 2개의 Sub Layer가 있습니다.
