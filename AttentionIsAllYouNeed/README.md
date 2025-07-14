@@ -98,7 +98,17 @@ Position Encoding은 입력 임베딩과 동일한 차원을 가지기 때문에
 이는 위치 정보를 주기적 주파수 함수로 표현해서 모델이 상대적인 위치를 잘 학습하도록 도와줍니다.
 
 ## 실험 결과
+![Table1](image/Table1.png)
 
+Table1은 한 층당 연산 복잡도와 연속 연산 복잡도와 최대 경로 길이 연산 복잡도를 비교한 표입니다. 여기서 Maximum path length는 서로 다른 두 토큰 사이에 정보가 전달될 때 거쳐야 하는 최소 연산 단계 수를 의미합니다. n번의 순차 연산을 거치면 길이는 O(n)이 됩니다.
+
+![Table2](image/Table2.png)
+
+Table2는 BLEU 점수와 학습 비용에 대한 표입니다.
+
+![Table3](image/Table3.png)
+
+Table3는 하이퍼파라미터, 모델의 크기, 드롭아웃 비율, 위치 인코딩 방식을 바꿔가면서 성능 변화를 비교한 표입니다.
 ## 결론
 계산 복잡도 측면에서 Recurrent Layer 보다 Self-Attention Layer가 더 빠르고, Convolu-tion Layer보다 Self-Attention Layer가 계산 비용이 더 저렴합니다.
 
