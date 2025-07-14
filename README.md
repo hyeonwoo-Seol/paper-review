@@ -20,3 +20,5 @@ SegFormer는 단순하고 효율적이며 강력한 Semantic Segmentation Framew
 ECMNet은 Mamba와 CNN을 결합한 경량화 Semantic Segmentation입니다.
 
 ### Attention Is All You Need
+
+### DeepSeek-R1
