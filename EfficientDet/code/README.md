@@ -25,6 +25,9 @@
 처럼 더 내려가기 시작했습니다.
 하지만 0.3 근처에서 더 이상 진전되지 않는 모습을 보이고 있습니다.
 
+ReduceLROnPlateau 와 CosineAnnealingLR 과 OneCycleLR 스케줄러를 사용해서 비교해본 결과,
+ReduceLROnPlateau는 적은 epoch로 약 0.3까지 내려갔지만, CosineAnnealingLR은 Reduce보다 더 많은 epoch로 0.4 근처에 머물렀습니다. OneCycleLR은 초기 Loss 값이 매우 컸으며 학습이 안되는 문제가 발생했습니다.
+
 ## 코드 작성
 > we use swish activation
 
