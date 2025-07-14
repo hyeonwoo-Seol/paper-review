@@ -17,8 +17,10 @@ Pyramid VisionTrnasformer와 Swin Transformer, Twins 등의 최신 방법들은 
 ## 4. 핵심 아이디어
 Positional Encoding이 없는 새로운 hierarchical Transformer 인코더와 복잡하고 계산량이 많은 모듈 없이도 강력한 표현력을 제공하는 경량 All-MLP 디코더 설계를 통해 세 가지 공개 Semantic Segmentation 데이터셋에서 효율성, 정확도, 강건성의 State-of-the-Art를 달성했습니다.
 
+### Positional Encoding 이 없는 Transformer 인코더
 Positional Encoding을 제외함으로써 Test와 Training의 이미지 해상도가 다를 경우 위치 코드 보간을 하지 않도록 했습니다. 이를 통해 성능 저하 없이 임의의 테스트 해상도에 유연하게 대처할 수 있습니다. 그리고 hierarchical 구조를 통해 고해상도의 정밀한 특징과 저해상도의 거친 특징을 모두 생성할 수 있습니다.
 
+### lightweight MLP 디코더
 경량 MLP 디코더는 Transformer의 하위 계층 Attention이 Local에 집중하고 상위 계층 Attention이 Global에 집중하는 것을 바꿨습니다. 경량 MLP 디코더는 Local과 Global Attnetion을 모두 통합할 수 있게 해서, 단순하고 직관적인 디코더 구조로 강력한 표현력을 얻었습니다.
 
 ## 5. 방법론
