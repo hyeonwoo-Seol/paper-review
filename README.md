@@ -12,6 +12,7 @@ EfficientNet을 Backbone으로 사용하고 BiFPN 구조를 도입한, 물체 �
 Vision 과업에 맞게 Mamba를 재설계하고, 이를 Vision Transformer와 결합한 모델입니다.
 
 ### SegFormer
+SegFormer는 단순하고 효율적이며 강력한 Semantic Segmentation Framework입니다. SegFormer는 Transformer와 경량의 MLP 디코더를 통합한 구조입니다.
 
 ### Deep Q-network
 
