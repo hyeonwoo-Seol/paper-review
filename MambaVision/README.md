@@ -110,6 +110,19 @@ c는 Concat으로, 두 분기에서 얻어진 C/2 채널의 출력을 이어붙�
 MambaVision은 고해상도에서 Stage1과 Stage2의 CNN을 활용하여 빠른 특징 추출을 수행하고, 저해상도에서 SSM과 Self-Attention을 함께 사용하여 short-Range 및 Long-Range 공간적 의존성을 효과적으로 포착하도록 설계됐습니다.
 
 ## 6. 실험 결과
+![Table1](image/Table1.png)
+
+Table1은 ImageNet-1k로 평가한 분류 벤치마크입니다.
+
+![Table2](image/Table2.png)
+
+MS COCO 데이터셋에서 평가한 object detection 및 instance segmentation 벤치마크 입니다.
+
+여기서 MambaVision 백본을 Mask-RCNN 검출 헤드와 결합하여 벤치마킹했습니다.
+
+![Table3](image/Table3.png)
+
+여기서는 MambaVision 백본 위에 UperNet 네트워크를 헤드로 붙여서 semantic Segmentation을 수행한 결과 표입니다.
 
 ## 7. 결론
 MambaVison은 Vison을 위한 Mamba-Transformer Hybrid Backbone입니다. Global Context Representation Learning 능력 향상을 위해 기존의 Mamba 구조를 재설계했습니다.
