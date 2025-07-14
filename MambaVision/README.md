@@ -112,7 +112,7 @@ MambaVision은 고해상도에서 Stage1과 Stage2의 CNN을 활용하여 빠른
 ## 6. 실험 결과
 ![Table1](image/Table1.png)
 
-Table1은 ImageNet-1k로 평가한 분류 벤치마크입니다.
+Table1은 ImageNet-1k로 평가한 분류 벤치마크입니다. 기존 ImageNet 벤치마크와 동일한 성정으로 분류 헤드만 사용하여 평가했습니다.
 
 ![Table2](image/Table2.png)
 
