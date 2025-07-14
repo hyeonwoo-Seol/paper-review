@@ -39,10 +39,16 @@ VMamba는 Depth-wise Convolution과 Hierarchical Multi-resolution Structure를 �
 즉, Vmamba의 CSM은 1D인 직선 형태의 Path로만 이루어져있기 때문에, 이 직선이 겹치지 않는 영역에 대한 reception field가 비어 있거나 희박해지기 때문에 완전한 전역 문맥을 한 번에 포착할 수 없습니다.
 
 ## 4. 핵심 아이디어
+### Mamba Block + Transformer Block
 기존 Mamba의 순차 데이터 처리에서의 장점과 Vision Transformer의 Global Context 포착 장점을 결합하기 위해 Mamba 블럭과 Transformer 블럭을 결합했습니다.
+
+### Residual Learning
 Conv Block 내부에 입력을 다시 더해줌으로써 입력과 크게 다른 부분에만 학습 자원을 집중하게 하는 잔차학습 효과와 기울기 소실 완화 효과를 가지게 했습니다.
 
+### Regular Convolution
 Stage3와 4에서 Causal Convolution을 Regular Convolution으로 대체함으로써 출력을 계산할 때 상/하/좌/우/대각선 정보들을 동등하게 참고합니다.
+
+### With SSM and without SSM
 Mamba Vision Mixer 블럭 내부에 SSM(Selective State Space Model)이 있는 흐름과 SSM이 없는 흐름으로 나눠서 SSM의 순차적 제약으로 인해 발생하는 정보 손실을 보완했습니다.
 
 ## 5. 방법론
