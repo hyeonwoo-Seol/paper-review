@@ -16,8 +16,10 @@ ConvNets는 더 높은 정확도를 위해 depth, width, resolution을 개별적
 그리고 이 논문 작성 시점에서 하드웨어 메모리의 한계 때문에 확장으로 인한 정확도 향상 뿐만 아니라 효율성 개선도 필요한 상황입니다. 그리고 이전 연구들은 정확도와 효율성을 모두 향상시키기 위해 ConvNet을 효과적으로 스케일링하는 방법을 찾아내지 못했습니다.
 
 ## 4. 핵심 아이디어
+### Compound Scaling
 이 논문은 세 차원을 모두 고려해 균형 있게 확장해야 최적의 정확도와 효율성을 달성할 수 있음을 확인했습니다. user-specific coefficient인 ϕ 와 그리드 탐색을 사용해서 얻은 depth, width, resolution의 constants 를 활용해서 이 세 차원을 균형있게 확장하는 방법을 제시합니다.
 
+### EfficientNet
 그리고 Neural Architecture Search를 사용해서 EfficientNet-B0를 얻고 Compound Scaling을 사용해서 B1 ~ B7을 얻었습니다.
 
 ## 5. 방법론
