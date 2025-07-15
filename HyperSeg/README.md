@@ -5,29 +5,32 @@
 저자: Cong Wei, Yujie Zhong, Haoxian Tan
 
 ## Abstract 요약
-복잡한 추론 분할에 대해서 이미지와 비디오 모두 적응하기 어려운 한계점으로 인해, fine-grained 수준의 vision-language 상관관계를 정확히 이해하는 데 어려움이 있습니다.
+기존 방법들은 복잡한 추론 분할에 대해 이미지 및 비디오에 모두 적응하기 어려운 한계점이 있습니다. 그리고 fine-grained (세밀한) 수준의 vision-language 상관관계를 정확히 이해하는 것을 어려워 합니다.
 
-이에 이 논문은 HyperSeg를 제안합니다. HyperSeg는 VLLM 기반 pixel-level 이미지와 비디오 인식을 위한 범용 분할 모델입니다.
+따라서 이 논문은 HyperSeg를 제안합니다. HyperSeg는 VLLM 기반 pixel-level 이미지 및 비디오 인식을 위한 범용 분할 모델입니다.
 
-일반적인 분할 작업을 포함하고, 강력한 추론 능력과 world knowledge가 필요한 복잡한 추론 인식 작업을 포함합니다.
+이 모델은 일반적인 분할 작업, 그리고 강력한 추론 능력과 world knowledge가 필요한 복잡한 추론 인식 작업을 수행할 수 있습니다.
 
-VLLM의 인식 능력과 세밀한 시각 정보를 전부 활용하기 위해, HyperSeg는 다양한 분할 작업을 위해 hybrid entity Recognition과 세밀한 시각 인식 모듈을 통합합니다.
+HyperSeg는 VLLM의 인식 능력과 세밀한 시각 정보를 전부 활용하고자 합니다. 그래서 HyperSeg는 다양한 분할 작업을 위한 Hybrid Entity Recognition과 Fine-Grained Visual Perceiver Module을 통합합니다.
 
-Temporal Adapter와 결합함으로써, HyperSeg는 temporal 정보의 포괄적인 이해가 가능합니다.
+Hyperseg에 Temporal Adapter와 결합함으로써, HyperSeg는 temporal 정보의 포괄적인 이해가 가능합니다.
+
 ## 문제 정의 및 동기
-Rudimentary Vision-Language 정렬 방법의 한계로 인해 세부적인 정보 이해가 어렵습니다.
+기존 방법들은 Rudimentary Vision-Language 정렬 방법의 한계 때문에, 세부적인 정보를 이해하기 어렵습니다.
 
-기존의 VLLM는 이미지와 비디오 도메인에서 모두 가능한 범용 분할 프레임워크로써 활용되기 어렵고, 복잡한 비디오 추론을 위한 시간적 맥락 이해 능력이 부족합니다.
+기존의 VLLM는 이미지 및 비디오 도메인 모두에서 가능한 범용 분할 프레임워크로써 활용되기 어렵고, 복잡한 비디오 추론을 위한 시간적 맥락 이해 능력이 부족합니다.
 
 ## 핵심 아이디어
 ### Hybrid Entity Recognition
-Figure3-c에서 볼 수 있듯이, Generation과 Decoding 단계에서 LLM을 활용하는 방식입니다.
+Figure3-c에서 볼 수 있듯이, Generation과 Decoding 단계 모두에서 LLM을 활용하는 방식입니다.
+
+생성에서만 사용하게 되면 객체 누락이나 중복 예측이 자주 발생하고, 디코딩에서만 사용하면 Mask Token이 의미 조건과 상호작용을 충분히 하지 못해서 분류 성능에 문제가 생깁니다.
 
 ![Figure3](image/Figure3.png)
 
-VLLM은 화면에 보이는 모든 객체의 이름을 먼저 생성한 뒤, Semanticly Enhanced Mask Token을 생성합니다. 이 토큰은 이미지에 대한 통합된 의미 정보를 포함하고, 이후에 분할 예측기의 입력으로 사용되어 최종 Segmentation Mask를 생성합니다.
+VLLM은 화면에 보이는 모든 객체의 이름을 먼저 생성한 뒤, 그 다음에 Semanticly Enhanced Mask Token을 생성합니다. 이 토큰은 이미지에 대한 통합된 의미 정보를 포함하고, 이후에 분할 예측기의 입력으로 사용되어 최종 Segmentation Mask를 생성합니다.
 
-VLLM이 디코딩 방식으로 생성하는 Prompt Embedding을 사용해서 각 마스크 토큰을 마스크의 클래스 점수로 계산합니다.
+그리고 VLLM이 디코딩 방식으로 생성하는 Prompt Embedding을 사용해서 각 마스크 토큰을 마스크의 클래스 점수로 계산합니다.
 
 
 ### Fine-grained Visual Perceiver Module (FVP Module)
