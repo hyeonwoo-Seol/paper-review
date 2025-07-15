@@ -15,9 +15,9 @@ VLLM의 인식 능력과 세밀한 시각 정보를 전부 활용하기 위해, 
 
 Temporal Adapter와 결합함으로써, HyperSeg는 temporal 정보의 포괄적인 이해가 가능합니다.
 ## 문제 정의 및 동기
-기본적인 Vision-Language 정렬 방법의 한계로 인해 세부적인 정보 이해가 어렵습니다.
+Rudimentary Vision-Language 정렬 방법의 한계로 인해 세부적인 정보 이해가 어렵습니다.
 
-VLLM는 이미지와 비디오 도메인에서 모두 가능한 범용 분할 프레임워크로써 활용되기 어렵고, 복잡한 비디오 추론 능력이 부족합니다.
+기존의 VLLM는 이미지와 비디오 도메인에서 모두 가능한 범용 분할 프레임워크로써 활용되기 어렵고, 복잡한 비디오 추론을 위한 시간적 맥락 이해 능력이 부족합니다.
 
 ## 핵심 아이디어
 ### Hybrid Entity Recognition
@@ -25,14 +25,12 @@ Figure3-c에서 볼 수 있듯이, Generation과 Decoding 단계에서 LLM을 �
 
 ![Figure3](image/Figure3.png)
 
-VLLM이 예측된 객체 이름 뒤에 Mask Token을 생성하도록 지시합니다.
+VLLM은 화면에 보이는 모든 객체의 이름을 먼저 생성한 뒤, Semanticly Enhanced Mask Token을 생성합니다. 이 토큰은 이미지에 대한 통합된 의미 정보를 포함하고, 이후에 분할 예측기의 입력으로 사용되어 최종 Segmentation Mask를 생성합니다.
 
-VLLM은 화면에 보이는 모든 객체의 이름을 먼저 생성한 뒤, Semanticly Enhanced Mask Token을 생성합니다. 이 토큰은 이미지에 대한 통합된 의미 정보를 포함하고, 분할 예측기의 입력으로 사용되어 Segmentation Mask를 생성합니다.
-
-VLLM이 디코딩 방식으로 생성하는 Prompt Embedding을 사용해서 각 마스크 토큰을 클래스 점수로 계산합니다.
+VLLM이 디코딩 방식으로 생성하는 Prompt Embedding을 사용해서 각 마스크 토큰을 마스크의 클래스 점수로 계산합니다.
 
 
-### Fine-grained Visual Perceiver Modules
+### Fine-grained Visual Perceiver Module (FVP Module)
 Figure4-b에서 볼 수 있듯이, Multi-Scale Visual 특징을 세분화된 토큰으로 융합합니다.
 
 ![Figure4](image/Figure4.png)
@@ -41,13 +39,15 @@ Figure4-b에서 볼 수 있듯이, Multi-Scale Visual 특징을 세분화된 토
 
 피라미드 Visoin Encoder F_seg를 사용해서, 시각 입력 V로부터 이미지 특징 f_img를 얻습니다. f_img 는 세부 정보에 민감한 특징이 있습니다.
 
-FVP 모듈은 Conditional Weighted Cross-Attention을 통해 각 토큰을 Eq5~6처럼 풍부화합니다.
+FVP 모듈은 Conditional Weighted Cross-Attention을 통해 각 토큰을 Eq5~6으로 풍부화합니다.
 
 ![eq5-6](image/Eq5-6.png)
 
 위 수식에서 MHCA는 Multi-Head Cross-Attention Layer 이고, G_p는 projection Function이고, tanh는 Normalizaton Function 입니다.
 
-tanh(MLP()는 조건부 가중치로서 사용되고, 이전 토큰 P_j-1에 잔차 연결을 수행하기 전에 이 조건부 가중치를 풍부화된 정밀 시각 토큰 P\hat_j에 곱합니다.
+Eq5를 수행해서 이전까지의 fine-grained 토큰 P_j-1에 시각정보를 주입합니다.
+
+Eq6에서, tanh(MLP()는 조건부 가중치로서 사용되고, 이전 토큰 P_j-1에 잔차 연결을 수행하기 전에 이 조건부 가중치[tanh(MLP())]를 풍부화된 정밀 시각 토큰 P\hat_j에 곱합니다.
 
 이 논문은 다양한 Multi-Scale Image Feature에 대한 적응과 학습 안정성을 유지하기 위해 초기 가중치 값을 0으로 설정했습니다.
 
@@ -72,16 +72,18 @@ Global Prompt Aggregation과 Local Space-Time Information Injection은 장기-�
 
 ## 방법론
 ### Overall Architecture
+HyperSeg는 fine-grained pyramid visual Encoder와 경량 VLLM과 Segmentation Predictor로 구성되어 있습니다.
+
 fine-grained visual information을 기반으로, VLLM은 다음의 세 가지 종류의 입력을 받습니다.
 1. CLIP 인코더로 인코딩된 시각 토큰
 2. 갱신된 정밀 토큰
 3. 다양한 지시를 위한 프롬프트 토큰
 
-Semanticly Enhanced Mask Token과 프롬프트 토큰의 출력 임베딩은 분할 예측기에 전달되어 최종 분할 결과를 생성합니다.
+VLLM이 생성한 Semanticly Enhanced Mask Token과 프롬프트 토큰의 출력 임베딩은 분할 예측기에 전달되어, 최종 분할 결과를 생성합니다.
 
 Global Prompt Aggregation과 Local Space-Time Information Injection을 사용해서 포괄적인 비디오 이해를 수행합니다.
 
-LLM은 LoRA를 사용해서 효율적인 파라미터 튜닝을 수행합니다.
+LLM fine-tuning에서 LoRA를 사용해서 효율적인 파라미터 튜닝을 수행합니다.
 
 사용자는 이미지 또는 비디오와, Prompt를 입력으로 넣어줍니다. 그리고 이미지 또는 비디오 분할 결과를 출력으로 얻습니다.
 
@@ -113,7 +115,6 @@ Cross Entropy 손실 함수로 L_cls를 사용합니다.
 
 ![Table2](image/Table2.png)
 
-
 ### Vanilla Encoder
 입력 영상 V를 저해상도로 리사이즈한 뒤, CLIP 인코더 F_CLIP에 통과시켜서 Global Vision Token f_v를 얻습니다.
 
@@ -137,7 +138,7 @@ LLM의 출력인 Prompt Embedding과 Semantically Enhanced Mask Tokens과 f_img�
 
 이를 통해 픽셀 단위의 {mask, class, Ins Embedding}을 생성합니다.
 
-![eq2](image/eq2.png)
+![eq2](image/Eq2.png)
 
 ### Temporal Adapter
 비디오 분할을 위해 시간 축 정보를 통합하거나 갱신하는 모듈입니다.
