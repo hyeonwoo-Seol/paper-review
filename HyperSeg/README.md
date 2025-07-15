@@ -28,9 +28,9 @@ Figure3-c에서 볼 수 있듯이, Generation과 Decoding 단계 모두에서 LL
 
 ![Figure3](image/Figure3.png)
 
-VLLM은 화면에 보이는 모든 객체의 이름을 먼저 생성한 뒤, 그 다음에 Semanticly Enhanced Mask Token을 생성합니다. 이 토큰은 이미지에 대한 통합된 의미 정보를 포함하고, 이후에 분할 예측기의 입력으로 사용되어 최종 Segmentation Mask를 생성합니다.
+**Generattion**. VLLM은 화면에 보이는 모든 객체의 이름을 먼저 생성한 뒤, 그 다음에 Semanticly Enhanced Mask Token을 생성합니다. 이 토큰은 이미지에 대한 통합된 의미 정보를 포함하고, 이후에 분할 예측기의 입력으로 사용되어 최종 Segmentation Mask를 생성합니다.
 
-그리고 VLLM이 디코딩 방식으로 생성하는 Prompt Embedding을 사용해서 각 마스크 토큰을 마스크의 클래스 점수로 계산합니다.
+**Decoding**. 그리고 VLLM이 디코딩 방식으로 생성하는 Prompt Embedding을 사용해서 각 마스크 토큰을 마스크의 클래스 점수로 계산합니다.
 
 
 ### Fine-grained Visual Perceiver Module (FVP Module)
@@ -72,6 +72,26 @@ Global Prompt Aggregation과 Local Space-Time Information Injection은 장기-�
 
 ### Prompt Design
 프롬프트를 Text Prompt와 Visual Prompt로 통합하여, 다양한 분할 작업을 일관되게 다루었습니다.
+
+## HyperSeg 흐름
+### 1. 입력 준비하기
+이미지 또는 비디오 V와 텍스트 또는 시각 프롬프트 P를 입력으로 받습니다.
+
+### 2. 다중 해상도 Visual Feature 인코딩과 FVP
+CLIP 인코더로 얻은 저해상도 Global Feature와 Pyramid Vision 인코더로 얻은 Multi-Scale visual feature를 준비합니다.
+
+Fine-Grained Visual Perceiver (FVP) 모듈이 Multi-Scale Visual feature를 fine-grained token으로 융합하여 LLM에 주입할 수 있는 형태로 만듭니다.
+
+### 3. VLLM 처리하기
+CLIP Token, FVP에서 생성된 fine-grained Token, Prompt Token을 모두 LLM에 입력해서 Vision-Language 융합 임베딩을 계산합니다.
+
+### 4. Hybrid Entity Recognition
+VLLM에게 Generation과 Decoding을 모두 활용하도록 지시해서, 객체 이름 리스트 뒤에 대응하는 Mask Token(Semantically enhanced Mask Token)을 생성하게 합니다.
+
+### 5. Segmentation Predictor
+VLLM에서 나온 Prompt Embedding과 Semantically Enhanced Mask Tokens, Pyramid Vision 인코더에서 얻은 Multi-Scale Visual Feature를 입력으로 받습니다.
+
+이를 통해 픽셀 단위 마스크, 클래스 점수, 인스턴트 임베딩을 출력합니다.
 
 ## 방법론
 ![figure2](image/Figure2.png)
