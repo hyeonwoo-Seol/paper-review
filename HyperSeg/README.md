@@ -74,6 +74,7 @@ Global Prompt Aggregation과 Local Space-Time Information Injection은 장기-�
 프롬프트를 Text Prompt와 Visual Prompt로 통합하여, 다양한 분할 작업을 일관되게 다루었습니다.
 
 ## 방법론
+![figure2](image/Figure2.png)
 ### Overall Architecture
 HyperSeg는 fine-grained pyramid visual Encoder와 경량 VLLM과 Segmentation Predictor로 구성되어 있습니다.
 
@@ -115,8 +116,6 @@ text 예측을 위해 autoregressive cross entropy loss인 L_text를 사용했�
 Cross Entropy 손실 함수로 L_cls를 사용합니다.
 
 비디오 시퀀스 사이의 인스턴스 연관을 위해 L_ins를 사용합니다.
-
-![Table2](image/Table2.png)
 
 ### Vanilla Encoder
 입력 영상 V를 저해상도로 리사이즈한 뒤, CLIP 인코더 F_CLIP에 통과시켜서 Global Vision Token f_v를 얻습니다.
