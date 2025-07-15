@@ -57,7 +57,13 @@ Global Prompt Aggregation. 현재 프롬프트 임베딩 E_p에 시간 축을 �
 
 Eq7
 
-Local Space-Time Information Injection. 
+Local Space-Time Information Injection. 인접 프레임의 객체 정보를 주입하기 위해, Sequential Renewal 전략을 사용합니다. 
+
+Eq8
+
+위 수식에서 P_t는 현재 t번째 프레임의 시간 인식 정밀 토큰을 의미하고, G_t는 이전 특징을 현재 시공간으로 전달하고 특징 차원 정렬하는 투영 함수입니다.
+
+Global Prompt Aggregation과 Local Space-Time Information Injection은 장기-단기 Vision-Language 정보를 효과적으로 coalescence합니다. 
 ## 방법론
 ### overall architecture
 information (Sec 3.3). The VLLM takes three types of inputs: visual tokens encoded by the CLIP encoder, renewed
