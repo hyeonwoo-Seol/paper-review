@@ -1,6 +1,13 @@
 # VGG
 
 ## 핵심 아이디어
+깊이가 깊어질 수록 대규모 인식에서 정확도가 향상된다.
+
+작은 크기인 3 x 3 Conv filter를 여러 번 사용하여 수용 영역을 확보함과 동시에 파라미터 수를 줄인다.
+
+학습할 때 scale jittering을 통한 데이터 증강이 일반화 성능을 향상시킨다.
+
+테스트 시 Dense Evaluation와 Multi-crop Evaluation를 병행하면, 정확도가 향상된다.
 
 ## 방법론
 ![Table1](image/Table1.png)
