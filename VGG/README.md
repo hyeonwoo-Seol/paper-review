@@ -54,7 +54,7 @@ This paper use small size of filters 3 x 3. This improved accuracy and reduced p
 
 Representation Depth is beneficial for the classification accuracy.
 
-훈련 이미지의 크기를 다양하게 조절하는 멀티-스케일 훈련(multi-scale training) 기법이 고정된 크기의 이미지로 훈련하는 것보다 훨씬 좋은 결과를 가져온다는 것을 입증했습니다.
+훈련 이미지의 크기를 다양하게 조절하는 multi-scale training 기법이 고정된 크기의 이미지로 훈련하는 것보다 훨씬 좋은 결과를 가져온다는 것을 입증했습니다.
 
 This paper combines the outputs of several models by averaging their soft-max class posteriors. This
 improves the performance due to complementarity of the models.
