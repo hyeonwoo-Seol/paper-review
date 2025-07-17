@@ -1,6 +1,17 @@
 # AlexNet
 
 ## 핵심 아이디어
+ReLU
+
+Multiple GPUs
+
+Local Response Normalization
+
+Overlapping Pooling
+
+Data Augmentation
+
+Dropout
 
 ## 방법론
 
@@ -63,6 +74,22 @@ Data augmentation consists of generating images translations and horizontal refl
 Additionally, Data augmentation consists of altering the intensites of the RGB channels in training images. This paper performs PCA on the set of RGB pixel value throughout the ImageNet training set. To each training image, this paper adds multiples of the found principal components with magnitudes proportional to the corresponding eigenvalues times a random variable drawn from a Gaussian with mean zero and standard deviation 0.1.
 
 This augmentation method approximates the property that the identity of an object is preserved under variations in lighting intensity and color. Unlike simple brightness adjustment, this method enhances diversity while preserving the overall color statistics of the image.
+
+#### Dropout
+Dropout is a technique that randomly disables some neurons during training to prevent overfitting and produce a more generalized model.
+
+50% of neurons are disabled during training. At test time, network uses all the neurons that multiply their outputs by 0.5.
+
+### Details of learning
+This network uses stochastic gradient descent with a batch size of 128 examples, momentum of 0.9, weight decay of 0.0005.
+
+The Update rule for weight, SGD equation is ![eq1](image/eq1.png)
+
+This paper initialized the weights from a zero-mean Gaussian distribution with standard deviation 0.01.
+
+And it initialized the biases in the Second, Fourth, Fifth Conv layer, Fully-Connected layers with constant 1. And then remaining layers are initialized with the contant 0.
+
+All layers use same learning rate. and it is initialized at 0.01. If the validation error rate stopped improving, learning rate is divided by 10. In this paper, the learning rate reduced three times.
 
 ## 결론
 On ILSVRC-2010, this paper achieves Top-1 test set error rates of 37.5% and Top-5 test set error rates of 17.0%.
