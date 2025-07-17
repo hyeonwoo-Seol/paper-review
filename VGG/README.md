@@ -31,12 +31,26 @@ momentum을 사용하는 mini-batch gradient descent로 Multinomial Logistic Reg
 
 batch size는 256이고, momentum은 0.9 입니다. Learning rate는 10^-2로 설정했고, validation set의 accuracy가 더 이상 향상되지 않으면 learning rate를 10으로 나누었습니다. 총 3번의 학습률 감소가 있었고, 전체 학습은 370K회(74 epochs) 입니다.
 
-Glorot & bengio (2010)의 무작위 가주치 초기화 방법을 사용하면 pre-training 없이도 가중치를 안정적으로 초기화할 수 있습니다.
+Glorot & bengio (2010)의 무작위 가중치 초기화 방법을 사용하면 pre-training 없이도 가중치를 안정적으로 초기화할 수 있습니다.
+
+## Testing
+The first FC Layer is converted to 7 x 7 Conv Layer and the last two FC Layers are converted to 1 x 1 Conv Layers.
+
+This Fully-convolutional Net outputs class score map with the number of channels equal to the number of classes. And then class score map is spatially averaged (sum-pooled).
+
+The final scores are obtained by averaging softmax class posteriors of original and flipped images.
 
 ## 결론
 This paper evaluated very deep Convolutional Network for large scale image classification.
 
+This paper use small size of filters 3 x 3. This improved accuracy and reduced parameters.
+
 Representation Depth is beneficial for the classification accuracy.
+
+훈련 이미지의 크기를 다양하게 조절하는 멀티-스케일 훈련(multi-scale training) 기법이 고정된 크기의 이미지로 훈련하는 것보다 훨씬 좋은 결과를 가져온다는 것을 입증했습니다.
+
+This paper combines the outputs of several models by averaging their soft-max class posteriors. This
+improves the performance due to complementarity of the models.
 
 Increassing depth, Convnetwork architecture achieved State-of-the-Art performance on the ImageNet.
 
