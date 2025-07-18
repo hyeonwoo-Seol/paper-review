@@ -1,5 +1,12 @@
 # Revisiting Skeleton-based Action Recognition
 
+## Korean
+Single Modality model인 PoseConv3D의 입력 표현은 2D heatmap을 시간축으로 쌓은 3D heatmap volume 입니다. 그리고 여러 3D-CNN을 backbone으로 사용할 수 있습니다. 3D-CNN backbone을 사용할 때 초기 down-sampling 연산을 제거합니다.
+
+Multi Modality model인 RGBPose-Conv3D는 RGB경로와 Pose경로를 비대칭으로 구성하고 bidirectional lateral connections을 추가해서 두 경로를 빠르게 결합합니다.
+
+
+
 ## Abstract
 GCN-based methods are subject to limitations in robustness, interoperability, scalability.
 
@@ -38,10 +45,12 @@ First, this paper find the smallest bounding box that envelops all the 2D pose a
 
 Second, this paper sampling a subset of frames due to reduce temporal dimension. This paper propose to use a uniform sampling strategy for 3D-CNN. It divide the video into n segments of equal length and randomly select one frame from each segment. Thus, it choise n frame and the heatmap volume is constructed only for these n frames.
 
----
-3.3 3D CNN for skeleton base Action Rec 부터 읽기
+이 논문은 Pose modality를 위한 PoseConv3D와 RGB+Pose dual-modality를 위한 RGBPose-Conv3D라는 두 가지 계열의 3D-CNN을 설계했습니다.
 
----
+PoseConv3D는 세 가지 3D-CNN(C3D, SlowOnly, X3D)을 backbone으로 각각 사용했고, 3D heatmap volume을 input으로 받습니다. 이 때 CNN backbone의 down-sampling 연산은 제거됩니다.
+
+RGBPose-Conv3D는 RGB modality와 Pose modality를 각각 처리하는 2개의 경로로 구성된 2-stream 3D-CNN 입니다. 이 두 경로는 asymmetrical입니다. pose 경로는 RGB 경로에 비해 채널 폭, 네트워크 깊이, 입력 공간 해상도가 작습니다. 그리고 두 경로 사이에 bidirectional lateral connections가 추가되어, early step에서 두 modality 사이의 feature fusion이 촉진됩니다. 그리고 Overfitting을 방지하기 위해 각 경로에 cross-entropy Loss Function을 사용합니다.
+
 
 ## 결론
 This paper proposed PoseConv3D, a 3D-CNN based approach for skeleton-based action recognition.
