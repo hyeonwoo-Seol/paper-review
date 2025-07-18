@@ -9,7 +9,6 @@ PoseConv3D is more effective in learning spatio-temporal features, and more robu
 
 Hierarchical features can be easily integrated at early fusion stages.
 
-
 ## 핵심 아이디어
 
 ## 방법론
