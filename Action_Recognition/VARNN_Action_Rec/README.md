@@ -11,6 +11,10 @@ In LSTM, the removal of the previous information or adition of the current infor
 
 View Adaptation module is end-to-end LSTM network.
 
+View Adaption Subnetwork determine the observation viewpoint automatically.
+
+View Adaptation Subnetwork is followed by Main LSTM Network that learning the temporal dynamics and performing the feature abstractions from the view-regulated skeleton data for action recognition.
+
 
 
 
