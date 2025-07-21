@@ -32,14 +32,13 @@ Data Augmentation
 
 Dropout
 
-## 방법론
 
-### DataSet
+## DataSet
 ImageNet is a dataset of over 15M labeled high resolution images with 22,000 categories.
 
 This paper down-sampled the images to a fixed resolution of 256 x 256. This paper only pre-process the image that subtracting the mean activity over the training set from each pixel.
 
-### Architecture
+## Architecture
 ![Figure2](image/Figure2.png)
 
 It contains eight learned layers that consist of five convolutional layers and three fully-connected layers.
@@ -66,26 +65,26 @@ Third Conv Layer has 384 kernels of size 3 x 3 x 256 and Fourth has 384 kernels 
 
 The Fully-connected layers have 4096 neurons each.
 
-#### ReLU
+## ReLU
 It contains ReLU Nonlinearity. Saturating Nonlinearities such as tanh(x) or f(x) = (1+e^-x)^-1 are much slower than the non-saturating nonlinearity.
 
 DCNN with ReLU train several times faster than tanh. This is demonstrated in Figure 1.
 
-#### Multiple GPU
+## Multiple GPU
 This paper put half of the kernels on each GPU.
 
 The two-GPU network takes slightly less time to train than the one-GPU.
 
-#### Local Response Normalization
+## Local Response Normalization
 Local Response Normalization aids generalization.
 
 This is reduce Top-1 and Top-5 error rate by 1.4% and 1.2%.
 
-#### Overlapping Pooling
+## Overlapping Pooling
 Pooling layers in CNN summarize outputs from nearby neuron groups within a kernel map. Overlapping Pooling reduces Top-1 and Top-5 error rate by 0.4% and 0.3%, as ccompared with the non-overlapping pooling.
 
-### Reduce Overfitting
-#### Data Augmentation
+
+## Data Augmentation (Reduce Overfitting)
 The Transformed images are generated in Python Code on the CPU while GPU is training on the previous batch of images.
 
 Data augmentation consists of generating images translations and horizontal reflections. This paper does this by extracting random 224 x 224 patches from the 256 x 256 images and training networks on these extracted patches.
@@ -94,12 +93,12 @@ Additionally, Data augmentation consists of altering the intensites of the RGB c
 
 This augmentation method approximates the property that the identity of an object is preserved under variations in lighting intensity and color. Unlike simple brightness adjustment, this method enhances diversity while preserving the overall color statistics of the image.
 
-#### Dropout
+## Dropout (Reduce Overfitting)
 Dropout is a technique that randomly disables some neurons during training to prevent overfitting and produce a more generalized model.
 
 50% of neurons are disabled during training. At test time, network uses all the neurons that multiply their outputs by 0.5.
 
-### Details of learning
+## Details of learning
 This network uses stochastic gradient descent with a batch size of 128 examples, momentum of 0.9, weight decay of 0.0005.
 
 The Update rule for weight, SGD equation is ![eq1](image/eq1.png)
