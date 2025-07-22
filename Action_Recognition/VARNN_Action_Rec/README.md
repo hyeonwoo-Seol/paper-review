@@ -13,6 +13,7 @@ View Adaptation 에는 Rotation LSTM branch와 Translation LSTM branch로 구성
 
 ## RNN and LSTM Overview
 ![Figure3](image/Figure3.png)
+
 Standard RNN faces the vanishing gradient effect, which is not very capable of handling long-term dependencies.
 
 In LSTM, the removal of the previous information or adition of the current information to the cell state are regulated with linear interactions by the forget gate and the input gate.
