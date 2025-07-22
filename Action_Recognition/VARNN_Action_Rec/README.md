@@ -48,6 +48,13 @@ With end-to-end training, the view adaptation model is guided to select the suit
 
 ![Table4](image/Table4.png)
 
+## Dataset
+NTU-RGB+D: Kinect 기반의 데이터셋으로, 인간 행동 인식을 위한 RGB+D 비디오와 Skeleton 데이터를 포함합니다. 이 데이터셋은 총 60개의 동작 클래스로 이루어져 있습니다.
+
+SBU Kinect Interaction Dataset: Kinect 기반 데이터셋으로, 두 명의 피사체가 상호작용하는 장면으로 구성된 데이터셋입니다. 8개의 동작 클래스로 이루어져 있습니다. 282개의 시퀀스로 구성되어 있습니다.
+
+SYSU 3D Human-Object Interaction Set: Kinect 기반 데이터셋으로, 40명의 피사체가 수행한 12개의 동작을 포함하고 있습니다. 480개의 시퀀스로 구성되어 있습니다.
+
 ## Conclusion
 View Adaptive Network is End-to-End Model for human action recognition.
 
