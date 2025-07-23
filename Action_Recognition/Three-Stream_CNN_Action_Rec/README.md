@@ -10,6 +10,7 @@ In first step, an independent convolution kernel slides on each channel of input
 In second step, an elemnet-wise summation across channel is used. So the features are aggregated globally.
 
 ## Feature Enhancement
+Bone segments provide the crucial cues to describe the human action. Because, bone segments can directly reflect the body's length and direction information
 
 ## Conclusion
 This paper proposed Three-Stream CNN model, 3SCNN.
