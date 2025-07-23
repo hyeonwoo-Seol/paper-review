@@ -14,6 +14,8 @@ Pairwise Feature Fusion은 3가지의 특징들 사이의 상호 보완적인 �
 
 Multi-task and Ensemble Learning은 모델의 일반화 성능을 높이기 위해 multi-task로 학습하고 훈련하며, ensemble learning으로 추론합니다.
 
+이를 통해 NTU RGB+D 데이터셋에서 뛰어난 성능을 보였습니다.
+
 ## Co-Occurrence Feature Learning with CNN
 
 An action is associated with and characterized by the interactions and combinations of a subset of skeleton joints.
