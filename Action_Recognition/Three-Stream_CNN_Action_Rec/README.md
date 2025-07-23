@@ -1,5 +1,19 @@
 # Three-Stream Convolutional Neural Network with Multi-task and Ensemble Learning for 3D Action Recognition
 
+## Korean
+
+이 논문은 oriented bone segment를 추가해서, joint position, joint displacement(motion), oriented bone segment 총 세 가지의 스트림으로 구성된 네트워크를 제안합니다.
+
+3D Joint Position은 skeleton의 Joint 3차원 좌표이고, Joint Displacement(motion)은 인접한 프레임 사이의 Joint 위치 변화량이고, Oriented Bone Segment는 인접한 두 Joint를 연결하는 vector입니다.
+
+3SCNN 모델은 3단계로 구성되어 있는데, Feature Enhancement, Pairwise Feature Fusion, Multi-task and Ensemble Learning 입니다.
+
+Feature Enhancement는 3가지 입력에 대해 각각 독립적으로 총 3가지의 특징을 추출하고 강화합니다.
+
+Pairwise Feature Fusion은 3가지의 특징들 사이의 상호 보완적인 관계를 활용하기 위해 3개 중 임의의 2개를 묶어 쌍으로 특징을 융합합니다.
+
+Multi-task and Ensemble Learning은 모델의 일반화 성능을 높이기 위해 multi-task로 학습하고 훈련하며, ensemble learning으로 추론합니다.
+
 ## Co-Occurrence Feature Learning with CNN
 
 An action is associated with and characterized by the interactions and combinations of a subset of skeleton joints.
@@ -16,15 +30,21 @@ In second step, an elemnet-wise summation across channel is used. So the feature
 
 Bone segments provide the crucial cues to describe the human action. Because, bone segments can directly reflect the body's length and direction information.
 
-Coordinate Adaptive Module은 서로 다른 시점에서 본 같은 skeleton sequence를 회전 변환을 통해 여러 관점의 정보를 얻음으로써 행동 표현의 풍부함과 식별력을 높이기 위한 방법이다.
+The Coordinate Adaptive Module is designed to improve the enrich of action representation.
 
-이 모듈에는 Multi-Coordinate Transformation, Point-Level Convolution, Rotation Matrix Learning으로 구성되어 있다.
+It does this by applying rotation transformations to the same skeleton sequence, cpatured from different viewpoints, to obtain multi-view information.
 
-Multi-Coordinate Transformation은 여러 회전 행렬로 다양한 시점의 시퀀스를 생성한다.
+This module consists of Multi-Coordinate Transformation, Point-Level Convolution, Rotation Matrix Learning.
 
-Point-Level Convolution에는 1x1 Convolution과 1x3 Convolution이 있는데, 1x1은 여러 좌표계로부터 나온 L개의 시퀀스를 채널 차원에서 적응적으로 결합하고, 1x3은 시간축 상의 Point-Level feature를 추출한다. 이 두 계층을 연속적으로 적용해서 회전 변환된 정보들을 효과적으로 융합한다.
+Multi-Coordinate Transformation generates sequence from various viewpoints using multiple rotation matrix.
 
-Rotation Matrix Learning은 회전행렬을 학습 가능한 파라미터로 두고, L개의 FC layer를 통해 각각의 회전행렬을 데이터로부터 학습시킨다.
+Point-Level Convolution includes 1x1 and 1x3 Conv. The 1x1 Conv adaptively combines the L sequences obtained from different coordinate systems along the channel dimension.
+
+The 1x3 Conv extracts point-level features along the temporal axis. These two layers are applied in sequence to effectively fuse the rotation-transformed information.
+
+Rotation matrix learning treats rotation matrices as learnable parameters.
+
+It uses L FC layers to learn each of the L rotation matrix directly from the data.
 
 ## Pairwise Feature Fusion Learning
 
