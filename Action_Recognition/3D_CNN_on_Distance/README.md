@@ -34,12 +34,48 @@ EDM 안에 있는 Local Structure를 효과적으로 학습하기 위해 CNN을 
 
 This 3D CNN capture the temporal evolution of the local structures encoded by the EDMs.
 
+3D Convolution is defined Eq1.
+
+![eq1](image/Eq1.png)
+
+They proposed Figure2 which is a network architecture (DM-3DCNN) inspired by ResNeXt.
+
+![figure2](image/Figure2.png)
+
+They repalced each convolution of ResNeXt to a spatio-temporal Convolution. And it performs the final global average pooling both over the spatial and time dimensions.
+
+To Compensate for the increase number of parameters, they reduce the number of filters in each layer by a factor 2.
+
+And they perform dropout on the inputs of the final FC layer.
+
+## Network Training
+
+Action Recognition 함수 f_\theta를 학습시켜야 한다.
+
+모델의 학습은 다음 수식을 최소화하는 방식으로 이루어진다.
+
+![eq1](image/Eq2.png)
+
+위 수식에서 손실함수 l은 log-loss를 사용합니다. 그리고 정규화 항은 l2 norm을 사용합니다.
+
+## Training Detail
+
+DM-3DCNN Network uses Stochastic Gradient Descent and Adam. Batch size is 32 and bata1 of Adam is 0.9 and beta2 of Adam is 0.999.
+
+When they use NTU RGB+D and MSRC12 dataset, initial learning rate is 1e-3. After 40 Epochs, reducing it by a factor 10. And after next 60 epochs, reducing it by a factor 10.
+
+They learned this model during 80 epochs.
+
+SBU 데이터셋은 샘플 수가 적어서 처음부터 학습시키면 과적합의 위험이 있습니다. 따라서 NTU RGB+D에서 학습된 모델을 fine-tuning 합니다.
+
+300회의 iteration 동안 learning rate를 1e-4에서 1e-5까지 지수적으로 감소시키면서 학습을 진행합니다.
+
 ## Conclusion
 
 They presented a novel DNN architecture for refocnizing human actions from 3D skeleton data. Their approach is based on two main ideas.
 
 First, Sequence of Skeletons are represented as sequences of euclidean distance matrix (EDM). This uses a learned transformation of the skeleton's joints.
 
-Second, these sequences are processed using a 3D CNN.
+Second, these sequences are processed using a 3D CNN (DM-3DCNN).
 
 On NTU RGB+D dataset, they achieved an improvement in accuracy of 2% over the previous SOTA approach, while using almost 1000 times fewer parameters and operations.
